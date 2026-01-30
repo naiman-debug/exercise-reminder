@@ -22,3 +22,4 @@ nul
 
 # 构建缓存
 .cache/
+package-lock.json
