@@ -1,0 +1,34 @@
+# 依赖
+node_modules/
+package-lock.json
+
+# 构建产物
+dist-electron/
+dist-renderer/
+out/
+build/
+
+# 临时文件
+*.log
+*.tmp
+nul
+
+# 测试和原型
+prototype/
+test.html
+capture_modals.py
+
+# 备份文件
+bak/
+*.bak
+
+# 编辑器
+.vscode/
+.idea/
+
+# MCP 数据
+.claude/
+.playwright-mcp/
+
+# 临时报告
+MCP-TEST-REPORT.md
