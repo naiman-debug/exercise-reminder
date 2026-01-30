@@ -1,0 +1,36 @@
+{
+  "mcpServers": {
+    "searxng": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "mcp-searxng"
+      ],
+      "env": {
+        "SEARXNG_URL": "http://localhost:8888"
+      }
+    },
+    "vision-mcp": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@lutery/vision-mcp"
+      ],
+      "env": {
+        "VISION_MODEL_TYPE": "siliconflow",
+        "VISION_API_KEY": "sk-7ce400cc79454af49b6fd62ebc69e7ab.LiscGibdoY1Dzp4z"
+      }
+    },
+    "glm-flash": {
+      "type": "stdio",
+      "command": "F:\\claude-code\\temp\\inbox\\mcp-glm-4.6v-flash\\start-server.bat",
+      "args": []
+    }
+  }
+}
