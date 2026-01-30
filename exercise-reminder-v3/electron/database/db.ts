@@ -154,7 +154,7 @@ function initData(db: Database.Database) {
     VALUES (?, ?, ?, datetime('now'))
   `);
 
-  const count = db.exec('SELECT COUNT(*) as count FROM exercises').get(0) as { count: number };
+  const count = db.prepare('SELECT COUNT(*) as count FROM exercises').get() as { count: number };
   if (count.count === 0) {
     exercises.forEach(exercise => {
       insertExercise.run(exercise.name, exercise.metValue, exercise.intensity);
@@ -174,7 +174,7 @@ function initData(db: Database.Database) {
     VALUES (?, ?, ?, ?, datetime('now'))
   `);
 
-  const settingCount = db.exec('SELECT COUNT(*) as count FROM reminder_settings').get(0) as { count: number };
+  const settingCount = db.prepare('SELECT COUNT(*) as count FROM reminder_settings').get() as { count: number };
   if (settingCount.count === 0) {
     reminderSettings.forEach(setting => {
       insertSetting.run(setting.type, setting.intervalMin, setting.intervalMax, setting.duration);

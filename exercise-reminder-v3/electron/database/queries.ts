@@ -125,11 +125,12 @@ export class DatabaseQueries {
     const achieved = (stats.total_calories >= targetCalories) ? 1 : 0;
 
     return {
+      id: 0, // 临时 id，实际保存时会由数据库生成
       date,
       totalCalories: stats.total_calories || 0,
       targetCalories,
       achieved: achieved === 1,
-      achievedToday: 0,
+      achievedToday: false,
       exerciseCount: stats.exercise_count || 0,
       gazeCount: stats.gaze_count || 0,
       standCount: stats.stand_count || 0,
@@ -180,18 +181,18 @@ export class DatabaseQueries {
     const today = new Date().toISOString().split('T')[0];
     const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
 
-    const todayStats = this.db.prepare('SELECT achieved FROM daily_stats WHERE date = ?').get(today);
-    const yesterdayStats = this.db.prepare('SELECT achieved FROM daily_stats WHERE date = ?').get(yesterday);
+    const todayStats = this.db.prepare('SELECT achieved FROM daily_stats WHERE date = ?').get(today) as { achieved: number } | undefined;
+    const yesterdayStats = this.db.prepare('SELECT achieved FROM daily_stats WHERE date = ?').get(yesterday) as { achieved: number } | undefined;
 
     if (!todayStats) {
       // 今天还没有记录，从历史计算
       return this.calculateStreakFromHistory();
     }
 
-    if (todayStats.achieved && yesterdayStats?.achieved) {
+    if (todayStats.achieved === 1 && yesterdayStats?.achieved === 1) {
       // 连续两天都打卡，继续往前算
       return 1 + this.getStreakDaysFrom(yesterday);
-    } else if (todayStats.achieved) {
+    } else if (todayStats.achieved === 1) {
       // 只有今天打卡
       return 1;
     } else {
@@ -202,9 +203,9 @@ export class DatabaseQueries {
 
   private getStreakDaysFrom(date: string): number {
     const prevDate = new Date(Date.parse(date) - 86400000).toISOString().split('T')[0];
-    const stats = this.db.prepare('SELECT achieved FROM daily_stats WHERE date = ?').get(prevDate);
+    const stats = this.db.prepare('SELECT achieved FROM daily_stats WHERE date = ?').get(prevDate) as { achieved: number } | undefined;
 
-    if (!stats || !stats.achieved) {
+    if (!stats || stats.achieved !== 1) {
       return 0;
     }
 

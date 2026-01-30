@@ -1,11 +1,21 @@
 import { ipcMain, BrowserWindow } from 'electron';
+import path from 'path';
 import { IPC_CHANNELS } from './channels';
 import { getDatabase } from '../database/db';
 import { DatabaseQueries } from '../database/queries';
+import { ReminderScheduler } from '../reminder/scheduler';
 
-export function registerIPCHandlers() {
+// 全局调度器实例
+let globalScheduler: ReminderScheduler | null = null;
+
+export function registerIPCHandlers(scheduler?: ReminderScheduler) {
   const db = getDatabase();
   const queries = new DatabaseQueries(db);
+
+  // 保存调度器引用
+  if (scheduler) {
+    globalScheduler = scheduler;
+  }
 
   // ===== 用户相关 =====
 
@@ -50,8 +60,9 @@ export function registerIPCHandlers() {
     const stats = queries.getTodayStats(today);
 
     if (stats && stats.totalCalories >= stats.targetCalories && !stats.achievedToday) {
-      stats.achievedToday = 1;
-      queries.saveDailyStats(stats);
+      // 更新 achievedToday 标志
+      const updatedStats = { ...stats, achievedToday: true };
+      queries.saveDailyStats(updatedStats);
 
       // 显示目标完成庆祝弹窗
       showGoalAchievedNotification(stats.totalCalories, stats.targetCalories);
@@ -87,12 +98,12 @@ export function registerIPCHandlers() {
     const user = queries.getUserInfo();
     if (!user) return null;
 
-    const totalResult = this.db.prepare(`
+    const totalResult = db.prepare(`
       SELECT SUM(total_calories) as total_calories
       FROM daily_stats
     `).get() as { total_calories: number } | undefined;
 
-    const exerciseCount = this.db.prepare(`
+    const exerciseCount = db.prepare(`
       SELECT COUNT(*) as count
       FROM daily_stats
       WHERE achieved = 1
@@ -125,25 +136,42 @@ export function registerIPCHandlers() {
   });
 
   ipcMain.handle(IPC_CHANNELS.UPDATE_REMINDER_SETTINGS, (_, settings) => {
-    return queries.updateReminderSettings(settings.type, settings);
+    const result = queries.updateReminderSettings(settings.type, settings);
+
+    // 更新调度器中的设置
+    if (globalScheduler) {
+      globalScheduler.updateReminderSettings(
+        settings.type,
+        settings.intervalMin,
+        settings.intervalMax,
+        settings.duration
+      );
+    }
+
+    return result;
   });
 
   // ===== 提醒控制 =====
 
-  let isPaused = false;
-
   ipcMain.handle(IPC_CHANNELS.PAUSE_REMINDERS, () => {
-    isPaused = true;
+    if (globalScheduler) {
+      globalScheduler.pause();
+    }
     return { success: true };
   });
 
   ipcMain.handle(IPC_CHANNELS.RESUME_REMINDERS, () => {
-    isPaused = false;
+    if (globalScheduler) {
+      globalScheduler.resume();
+    }
     return { success: true };
   });
 
   ipcMain.handle(IPC_CHANNELS.GET_REMINDER_STATUS, () => {
-    return { isPaused };
+    if (globalScheduler) {
+      return globalScheduler.getState();
+    }
+    return { isRunning: false, isPaused: false };
   });
 
   // ===== 系统功能 =====
