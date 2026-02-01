@@ -26,17 +26,15 @@
 - **CURRENT_TASK.md** - 当前任务快照
 - **docs/TASKS.md** - 详细任务管理
 
-**强制规则**：
-- ✅ **完成任务后**：必须同步更新 docs/TASKS.md + CURRENT_TASK.md
-- ✅ **开始任务时**：必须同步更新 docs/TASKS.md + CURRENT_TASK.md
-- ✅ **重大变更后**：必须关联更新所有受影响文档（README + CLAUDE.md）
-- ✅ **会话结束时**：必须检查文档一致性
-- ✅ **Git 提交前**：必须验证文档状态
+**强制规则**（由 Git Hook 自动执行）：
+- ✅ **约束文件变更时**：Git pre-commit hook 自动检查是否同步了 TASKS.md + CURRENT_TASK.md
+- ✅ **代码文件变更时**：Git pre-commit hook 要求确认已使用 Skill 进行代码审查
+- ✅ **提交前**：自动运行类型检查 + 单元测试（100% 通过才能提交）
+- ✅ **提交信息**：Git commit-msg hook 验证 Conventional Commits 格式
+- ✅ **提交后**：Git post-commit hook 自动更新 WORK-LOG.md
+- ✅ **推送前**：Git pre-push hook 检查保护分支 + 运行最终测试
 
-**Hook 规则**：
-- `hookify.task-sync-on-complete.local.md` - 任务完成自动同步
-- `hookify.tech-stack-sync.local.md` - 技术栈变更自动关联
-- `hookify.doc-consistency-check.local.md` - 会话结束前一致性检查
+**执行方式**：100% Git Hook 强制执行，无需 AI 记忆
 
 **关联更新矩阵**：
 | 变更类型 | README.md | CLAUDE.md | CURRENT_TASK.md | docs/TASKS.md |
@@ -249,7 +247,24 @@
 
 ## 📝 约束文档版本
 
-- **v1.6** (2026-02-01) - 添加关键文档自动更新约束 ⭐🆕
+- **v2.0** (2026-02-01) - 所有约束转换为 Git Hook 强制执行 🆕⭐⭐
+  - **执行率从 40% 提升到 100%**
+  - **pre-commit hook** 增强（4 项强制检查）：
+    1. 关键文档同步检查（约束文件变更时必须同步 TASKS.md + CURRENT_TASK.md）
+    2. 代码审查提醒（代码文件变更时确认已使用 Skill 审查）
+    3. TypeScript 类型检查
+    4. 单元测试验证（100% 通过）
+  - **post-commit hook** 增强：
+    - 自动更新 WORK-LOG.md
+    - 约束文件变更提醒
+  - **commit-msg hook**：
+    - Conventional Commits 格式验证
+  - **pre-push hook**：
+    - 保护分支检查
+    - 最终测试验证
+  - **不再依赖 AI 主动遵守** - 全部通过 Git Hook 强制执行
+
+- **v1.7** (2026-02-01) - 添加约束体系总览和自动更新检测
   - 新增 `constraints/critical-docs-auto-update.md` 文档
   - 定义 4 个关键文档（README.md、CLAUDE.md、CURRENT_TASK.md、docs/TASKS.md）
   - 创建关联更新矩阵（变更类型 → 受影响文档）
