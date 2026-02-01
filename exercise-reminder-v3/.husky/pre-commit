@@ -1,0 +1,29 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "=== Pre-commit Hook 检查 ==="
+
+# 1. 类型检查
+echo "1/2 类型检查..."
+npm run typecheck
+TYPECHECK_EXIT=$?
+
+if [ $TYPECHECK_EXIT -ne 0 ]; then
+  echo ""
+  echo "类型检查失败！请修复 TypeScript 错误后再提交。"
+  exit 1
+fi
+
+# 2. 单元测试
+echo "2/2 单元测试..."
+npm run test
+TEST_EXIT=$?
+
+if [ $TEST_EXIT -ne 0 ]; then
+  echo ""
+  echo "测试失败！请确保所有测试通过后再提交。"
+  exit 1
+fi
+
+echo ""
+echo "=== 所有检查通过 ==="

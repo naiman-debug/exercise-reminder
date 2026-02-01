@@ -1,0 +1,38 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+commit_msg_file=$1
+commit_msg=$(cat "$commit_msg_file")
+
+# Conventional Commits 格式检查
+# 允许的 type: feat, fix, docs, style, refactor, test, chore, perf, ci
+# 格式: type(scope): subject
+pattern="^(feat|fix|docs|style|refactor|test|chore|perf|ci)(\(.+\))?\:.{1,}"
+
+if echo "$commit_msg" | grep -qE "$pattern"; then
+  echo "=== 提交信息格式正确 ==="
+  exit 0
+else
+  echo "=== 提交信息格式错误 ==="
+  echo ""
+  echo "请使用 Conventional Commits 格式："
+  echo "  <type>(<scope>): <subject>"
+  echo ""
+  echo "允许的 type："
+  echo "  feat     - 新功能"
+  echo "  fix      - Bug 修复"
+  echo "  docs     - 文档更新"
+  echo "  style    - 代码格式"
+  echo "  refactor - 重构"
+  echo "  test     - 测试相关"
+  echo "  chore    - 构建/工具"
+  echo "  perf     - 性能优化"
+  echo "  ci       - CI 配置"
+  echo ""
+  echo "示例："
+  echo "  feat: 添加用户登录功能"
+  echo "  fix(database): 修复查询超时问题"
+  echo "  docs(readme): 更新安装说明"
+  echo ""
+  exit 1
+fi

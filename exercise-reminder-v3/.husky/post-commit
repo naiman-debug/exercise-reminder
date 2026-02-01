@@ -1,0 +1,44 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# 获取 commit 信息
+commit_hash=$(git rev-parse HEAD)
+commit_author=$(git log -1 --format='%an')
+commit_date=$(git log -1 --format='%ai' | cut -d' ' -f1)
+commit_time=$(git log -1 --format='%ai' | cut -d' ' -f2 | cut -d':' -f1-2)
+commit_subject=$(git log -1 --format='%s')
+commit_body=$(git log -1 --format='%b')
+changed_files=$(git diff-tree --no-commit-id --name-status -r HEAD)
+
+# 生成日志条目
+log_entry="## 📝 Git Commit 记录
+
+**时间**：$commit_date $commit_time
+**提交者**：$commit_author
+**Commit**：\`$commit_hash\`
+
+### 提交信息
+> $commit_subject
+
+$commit_body
+
+### 变更文件
+\`\`\`
+$changed_files
+\`\`\`
+
+**自动记录于**：$(date '+%Y-%m-%d %H:%M:%S')
+
+---
+
+"
+
+# 追加到 WORK-LOG.md
+worklog_file="docs/WORK-LOG.md"
+
+if [ -f "$worklog_file" ]; then
+  echo "$log_entry" >> "$worklog_file"
+  echo "=== 工作日志已更新 ==="
+else
+  echo "=== 警告：未找到 $worklog_file ==="
+fi
