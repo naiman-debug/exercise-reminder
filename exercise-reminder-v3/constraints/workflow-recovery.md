@@ -17,7 +17,7 @@
 
 ### 触发条件
 - 任何新会话启动（包括 `/clear` 后的新会话）
-- 用户输入快速恢复命令（见规则 3）
+- 用户输入快速恢复命令（见规则 4）
 
 ### 执行步骤
 
@@ -25,8 +25,14 @@
 # 1. 读取工作日志最后 20 行
 tail -n 20 docs/WORK-LOG.md
 
-# 2. 如果文件不存在，提示创建
-# 3. 如果文件存在且为空，提示检查历史记录
+# 2. 读取项目知识
+head -n 100 docs/KNOWLEDGE-BASE.md
+head -n 50 docs/BUG-QUESTION-LOG.md
+
+# 3. 读取工具指南
+head -n 80 docs/SKILLS-MCP-GUIDE.md
+
+# 4. 如果文件不存在，提示创建
 ```
 
 ### 自动汇报格式
@@ -45,9 +51,13 @@ tail -n 20 docs/WORK-LOG.md
 - 位置：[文件路径或模块名称]
 - 优先级：[P0/P1/P2]
 
-🛠️ 使用工具：
-- MCP：[MCP 工具名称]
-- Skills：[技能名称]
+⚠️ 已知问题：
+- [来自 BUG-QUESTION-LOG.md 的问题列表]
+- [需要避免的已知坑]
+
+🛠️ 可用工具：
+- Skills：[本项目使用过的 Skills]
+- MCP：[本项目使用过的 MCP 工具]
 
 📊 当前进度：[X]%
 
@@ -70,9 +80,14 @@ tail -n 20 docs/WORK-LOG.md
 - 位置：electron/reminder/scheduler.ts
 - 优先级：P0（最高）
 
-🛠️ 使用工具：
-- MCP：mcp__cclsp__find_definition（代码导航）
-- Skills：brainstorming（需求细化）、writing-plans（编写计划）
+⚠️ 已知问题：
+- 数据库列名必须添加别名（snake_case → camelCase）
+- main.ts 必须按顺序初始化所有模块
+- 不要用 SELECT * + 类型断言
+
+🛠️ 可用工具：
+- Skills：test-driven-development, security-review, backend-patterns
+- MCP：cclsp（代码导航）、filesystem（文件操作）
 
 📊 当前进度：35%
 
@@ -144,6 +159,22 @@ echo "- 🔄 已压缩上下文" >> docs/WORK-LOG.md
 
 ## 📌 规则 3：自动日志更新 - 触发点
 
+### 记录阈值（何时需要记录）
+
+| 操作类型 | 阈值 | 说明 |
+|----------|------|------|
+| **代码修改** | 修改 ≥3 个文件 或 新增 ≥50 行代码 | 批量修改需要记录 |
+| **功能开发** | 耗时 ≥10 分钟 | 一次性完成的任务 |
+| **bug 修复** | 任何修复后 | 记录问题和解决方案 |
+| **任务暂停** | 会话结束前 | 总结当前进度和待办 |
+
+### 不需要记录的情况
+
+- ❌ 只读操作（查看文件、分析代码）
+- ❌ 简单单行修改（修正拼写、格式调整）
+- ❌ 询问问题、讨论方案
+- ❌ 用户明确说"不用记录"
+
 ### 必须更新的时机
 
 #### 3.1 完成任何模块后
@@ -163,6 +194,16 @@ echo "- 🔄 已压缩上下文" >> docs/WORK-LOG.md
 - ✅ 架构设计确定
 - ✅ 技术选型确定
 - ✅ 问题解决方案确定
+
+#### 3.4 任务状态变更 🆕 **新增**
+- ✅ 创建新任务（添加到 `docs/TASKS.md`）
+- ✅ 任务状态变更（待开始→进行中→等待条件→完成）
+- ✅ 子任务完成
+- ✅ 进度更新
+
+### 更新内容要求
+
+```markdown
 
 ### 更新内容要求
 
@@ -448,15 +489,212 @@ END IF
 
 ---
 
+## 📌 规则 10：强制更新知识库
+
+### 触发条件
+
+满足以下任一条件时，**必须立即更新**对应的知识库文档：
+
+1. **遇到新的问题或 bug**
+   - 更新文档：`docs/BUG-QUESTION-LOG.md`
+
+2. **学到新的经验或教训**
+   - 更新文档：`docs/KNOWLEDGE-BASE.md`
+   - 更新文档：`docs/BUG-QUESTION-LOG.md`（经验教训部分）
+
+3. **使用新的 Skill 或 MCP 工具**
+   - 更新文档：`docs/SKILLS-MCP-GUIDE.md`
+   - 记录使用场景、效果、建议
+
+4. **改进工作流程**
+   - 更新文档：`docs/WORKFLOW-EVOLUTION.md`
+   - 记录原因、方案、效果
+
+### 更新内容要求
+
+每个更新必须包含：
+
+#### 对于 Bug/问题：
+- ✅ 问题描述
+- ✅ 排查过程
+- ✅ 解决方案
+- ✅ 经验教训
+
+#### 对于经验：
+- ✅ 场景描述
+- ✅ 解决方案
+- ✅ 适用条件
+- ✅ 注意事项
+
+#### 对于工具：
+- ✅ 使用场景
+- ✅ 实际效果
+- ✅ 对比分析
+- ✅ 推荐指数
+
+#### 对于流程改进：
+- ✅ 改进原因
+- ✅ 改进方案
+- ✅ 效果对比
+- ✅ 指标变化
+
+### 执行方式
+
+```bash
+# 立即更新（不允许延迟）
+# 更新后添加到 WORK-LOG.md
+echo "- 📝 已更新知识库文档：docs/XXX.md" >> docs/WORK-LOG.md
+```
+
+### 相关文档映射
+
+| 触发条件 | 更新文档 |
+|----------|----------|
+| Bug/问题 | `docs/BUG-QUESTION-LOG.md` |
+| 新经验 | `docs/KNOWLEDGE-BASE.md` |
+| 新工具 | `docs/SKILLS-MCP-GUIDE.md` |
+| 流程改进 | `docs/WORKFLOW-EVOLUTION.md` |
+
+---
+
+## 📌 规则 11：开发完成后强制测试 ⭐ **新增**
+
+### 触发条件
+
+完成以下任一操作后，**必须立即执行**强制测试验证：
+
+1. ✅ **完成一个完整模块**（如数据库层、IPC 通信层、UI 组件）
+2. ✅ **完成超过 3 个文件的修改**（连续修改多个文件）
+3. ✅ **修复一个 bug**（bug 修复后必须验证）
+4. ✅ **添加新功能**（任何功能实现后）
+
+### 强制测试流程
+
+```bash
+# 1. 必须使用 test-driven-development skill
+/skill test-driven-development
+
+# 2. 根据模块类型使用其他审查 skills
+- 安全相关：/skill security-review
+- 后端代码：/skill backend-patterns
+- 前端代码：/skill frontend-design
+
+# 3. 执行测试
+npm test                    # 运行单元测试
+npm run test:integration   # 运行集成测试（如有）
+
+# 4. 验证通过标准
+# 所有测试必须通过才能标记"完成"
+```
+
+### 必须使用的测试 Skills
+
+| Skill | 适用场景 | 触发条件 |
+|-------|----------|----------|
+| `test-driven-development` | 所有模块 | **强制** - 完成任何开发后 |
+| `security-review` | 处理用户输入、认证、API、敏感数据 | **强制** - 涉及安全功能 |
+| `backend-patterns` | API 路由、数据库查询、服务层 | **强制** - 后端代码 |
+| `requesting-code-review` | 完成重大功能 | **推荐** - 提交前审查 |
+
+### 测试通过标准
+
+#### 标准通过条件
+- ✅ 所有单元测试通过（100%）
+- ✅ 无 TypeScript 类型错误
+- ✅ 无 ESLint 警告
+- ✅ 安全审查通过（如适用）
+- ✅ 代码审查通过（如适用）
+
+#### 测试报告格式
+
+```markdown
+### 🧪 测试验证报告
+- **时间**：[YYYY-MM-DD HH:MM]
+- **测试模块**：[模块名称]
+- **测试类型**：单元测试 / 集成测试 / 安全审查
+
+#### 测试结果
+| 测试项 | 状态 | 说明 |
+|--------|------|------|
+| 单元测试 | ✅ 通过 | 15/15 tests passed |
+| 类型检查 | ✅ 通过 | No TypeScript errors |
+| 代码规范 | ✅ 通过 | No ESLint warnings |
+| 安全审查 | ✅ 通过 | No vulnerabilities found |
+
+#### 使用的 Skills
+- test-driven-development
+- security-review
+- backend-patterns
+
+#### 结论
+✅ **测试全部通过，可以标记为"完成"**
+```
+
+#### 不通过处理
+
+```
+IF 测试未通过 THEN
+    1. 记录失败的测试项
+    2. 分析失败原因
+    3. 修复问题
+    4. 重新测试
+    5. 直到全部通过
+END IF
+
+⚠️ 不允许跳过测试或标记为"临时完成"
+```
+
+### 执行示例
+
+```
+[场景]：完成数据库层 5 个文件的编写
+
+[AI 自动执行]：
+1. 检测到已完成数据库层模块开发
+2. 立即调用：test-driven-development skill
+3. 编写/运行测试：
+   - npm test
+   - 检查测试覆盖率
+4. 调用：security-review skill（数据库安全）
+5. 调用：backend-patterns skill（架构审查）
+6. 生成测试报告
+7. IF 全部通过 THEN
+       标记为"完成"
+       更新 WORK-LOG.md
+   ELSE
+       修复问题
+       重新测试
+   END IF
+```
+
+---
+
 ## 🔗 相关文档
 
 - **工作日志**：`docs/WORK-LOG.md`
+- **知识库**：`docs/KNOWLEDGE-BASE.md`
+- **Bug 日志**：`docs/BUG-QUESTION-LOG.md`
+- **工具手册**：`docs/SKILLS-MCP-GUIDE.md`
+- **演进历史**：`docs/WORKFLOW-EVOLUTION.md`
+- **知识库更新触发**：`constraints/knowledge-update-triggers.md` ⭐
 - **工作流程规范**：`F:\claude-code\AGENTS.md`
 - **文件组织规范**：`F:\claude-code\.global\rules\FILE_ORGANIZATION_RULES.md`
 
 ---
 
 ## 📝 版本历史
+
+- **v1.3** (2026-01-30) - 添加开发完成后强制测试规则
+  - 新增规则 11：开发完成后强制测试
+  - 定义 4 种触发测试的条件
+  - 规范必须使用的测试 Skills
+  - 定义测试通过标准和报告格式
+
+- **v1.2** (2026-01-30) - 添加知识库更新规则
+  - 新增规则 10：强制更新知识库
+  - 定义 4 种触发条件和对应文档
+  - 规范更新内容要求
+  - 建立文档映射关系
 
 - **v1.1** (2026-01-30) - 添加上下文压缩规则
   - 新增规则 2：强制执行上下文压缩

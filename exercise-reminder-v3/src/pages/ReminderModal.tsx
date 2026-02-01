@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import { TriggerEventData } from '../types';
-import { COLORS } from '../constants';
+import '../styles/reminder-modal.css';
 
 export default function ReminderModal() {
   const [eventData, setEventData] = useState<TriggerEventData | null>(null);
   const [countdown, setCountdown] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [userWeight, setUserWeight] = useState<number>(70);
 
   useEffect(() => {
-    // 从 URL 参数获取事件数据
     const params = new URLSearchParams(window.location.hash.split('?')[1]);
     const type = params.get('type') as 'exercise' | 'gaze' | 'stand' | null;
     const duration = Number(params.get('duration')) || 0;
@@ -16,16 +16,29 @@ export default function ReminderModal() {
     const metValue = params.get('metValue') ? Number(params.get('metValue')) : undefined;
 
     if (type) {
-      const data: TriggerEventData = {
+      setEventData({
         type,
         duration,
         timestamp: Date.now(),
         exerciseName,
         metValue,
-      };
-      setEventData(data);
+      });
       setCountdown(duration);
     }
+  }, []);
+
+  useEffect(() => {
+    const loadUserWeight = async () => {
+      try {
+        const info = await window.electronAPI.getUserInfo();
+        if (info?.weight) {
+          setUserWeight(Number(info.weight));
+        }
+      } catch (error) {
+        console.error('Failed to load user info:', error);
+      }
+    };
+    loadUserWeight();
   }, []);
 
   useEffect(() => {
@@ -34,7 +47,6 @@ export default function ReminderModal() {
     const timer = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
-          // 倒计时结束，自动完成
           handleComplete();
           return 0;
         }
@@ -50,12 +62,24 @@ export default function ReminderModal() {
 
     setIsCompleted(true);
 
-    // 保存活动记录
+    const now = new Date();
+    const timestamp = now.toISOString();
+    const date = timestamp.split('T')[0];
+
+    const calories = eventData.metValue
+      ? Number(((eventData.metValue * userWeight * (eventData.duration / 60)) / 60).toFixed(1))
+      : null;
+
     const activity = {
       type: eventData.type,
       name: eventData.exerciseName || (eventData.type === 'exercise' ? '运动' : eventData.type === 'gaze' ? '远眺' : '站立'),
       duration: eventData.duration,
       ...(eventData.metValue && { metValue: eventData.metValue }),
+      ...(calories !== null && { calories }),
+      weight: userWeight,
+      timestamp,
+      date,
+      completed: true,
     };
 
     try {
@@ -64,7 +88,6 @@ export default function ReminderModal() {
       console.error('Failed to save activity:', error);
     }
 
-    // 延迟关闭窗口
     setTimeout(() => {
       window.close();
     }, 500);
@@ -82,44 +105,35 @@ export default function ReminderModal() {
 
   const getTitle = () => {
     if (!eventData) return '';
-
-    switch (eventData.type) {
-      case 'exercise':
-        return '🏃 微运动时间';
-      case 'gaze':
-        return '👀 远眺放松';
-      case 'stand':
-        return '🧍 站立提醒';
-      default:
-        return '健康提醒';
-    }
+    if (eventData.type === 'exercise') return '微运动时间';
+    if (eventData.type === 'gaze') return '远眺放松';
+    if (eventData.type === 'stand') return '站立提醒';
+    return '健康提醒';
   };
 
   const getPromptText = () => {
     if (!eventData) return '';
+    if (eventData.type === 'exercise') return eventData.exerciseName || '运动时间';
+    if (eventData.type === 'gaze') return '远眺放松';
+    if (eventData.type === 'stand') return '站立活动';
+    return '';
+  };
 
-    switch (eventData.type) {
-      case 'exercise':
-        return eventData.exerciseName || '运动时间';
-      case 'gaze':
-        return '望向5米外，放松眼睛';
-      case 'stand':
-        return '请站起来活动一下';
-      default:
-        return '';
-    }
+  const getSubtitle = () => {
+    if (!eventData) return '';
+    if (eventData.type === 'gaze') return '望向 5 米外，放松眼睛';
+    if (eventData.type === 'stand') return '放松肩颈与腰背';
+    return '';
   };
 
   const calculateCalories = () => {
     if (!eventData || !eventData.metValue) return null;
-
-    // 从用户信息获取体重（这里简化处理，实际应从 store 获取）
-    const weight = 70; // 默认体重
     const durationInMinutes = eventData.duration / 60;
-    return (eventData.metValue * weight * durationInMinutes / 60).toFixed(1);
+    return (eventData.metValue * userWeight * durationInMinutes / 60).toFixed(1);
   };
 
-  const isWarning = countdown <= 10 && countdown > 0;
+  const isWarning = countdown <= 10 && countdown > 5;
+  const isCritical = countdown <= 5 && countdown > 0;
 
   if (!eventData) {
     return (
@@ -130,67 +144,63 @@ export default function ReminderModal() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-white text-gray-800">
-      {/* Title Bar */}
-      <div className="absolute top-0 left-0 right-0 flex justify-between items-center px-4 py-2 bg-gray-100">
-        <div className="font-medium">{getTitle()}</div>
-        <button
-          onClick={handleSkip}
-          className="text-gray-600 hover:text-gray-800 text-xl px-2"
-          title="跳过"
-        >
-          ×
-        </button>
-      </div>
+    <div className="reminder-page">
+      <div
+        data-testid="reminder-modal"
+        data-variant={eventData.type}
+        className={`modal-shell ${eventData.type === 'stand' ? 'modal-small' : 'modal-large'} ${
+          eventData.type === 'gaze' ? 'modal-eye' : eventData.type === 'stand' ? 'modal-stand' : 'modal-exercise'
+        }`}
+      >
+        <div className="modal-header" style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}>
+          <div className="modal-title">
+            <span className="icon">{eventData.type === 'exercise' ? '⚡' : eventData.type === 'gaze' ? '👀' : '🧍'}</span>
+            <span>{getTitle()}</span>
+          </div>
+          <div className="window-controls" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
+            <button className="window-btn" aria-disabled>
+              _
+            </button>
+            <button className="window-btn" aria-disabled>
+              ▢
+            </button>
+            <button onClick={handleSkip} className="window-btn close" title="跳过">
+              ×
+            </button>
+          </div>
+        </div>
 
-      {/* Content */}
-      <div className="flex-1 flex flex-col items-center justify-center w-full max-w-lg px-8">
-        {/* Prompt */}
-        <div className="text-center mb-8">
-          <div className="text-2xl font-bold mb-2">{getPromptText()}</div>
-          {eventData.metValue && (
-            <div className="text-lg text-gray-600">MET: {eventData.metValue}</div>
+        <div className="modal-body">
+          <div style={{ textAlign: 'center' }}>
+            <div className="activity-name">{getPromptText()}</div>
+            {getSubtitle() && <div className="activity-subtitle">{getSubtitle()}</div>}
+            {eventData.metValue && (
+              <div className="activity-info" style={{ marginTop: '8px' }}>
+                <span className="met-badge">MET: {eventData.metValue}</span>
+              </div>
+            )}
+          </div>
+
+          <div className="countdown-container">
+            <div
+              data-testid="countdown-display"
+              className={`countdown-display ${isCritical ? 'critical' : isWarning ? 'warning' : ''}`}
+              style={eventData.type === 'stand' ? { fontSize: '80px' } : undefined}
+            >
+              {isCompleted ? '✓' : formatTime(countdown)}
+            </div>
+            <div className="countdown-label">倒计时</div>
+          </div>
+
+          {eventData.type === 'exercise' && calculateCalories() && (
+            <div className="calories-display">
+              <span>预计消耗：</span>
+              <span className="value">{calculateCalories()}</span>
+              <span>千卡</span>
+            </div>
           )}
         </div>
-
-        {/* Countdown */}
-        <div
-          className={`text-8xl font-bold mb-8 transition-colors ${
-            isWarning ? 'text-orange-500' : 'text-green-500'
-          }`}
-        >
-          {isCompleted ? '✓' : formatTime(countdown)}
-        </div>
-
-        {/* Calories (for exercise) */}
-        {eventData.type === 'exercise' && calculateCalories() && (
-          <div className="text-center text-gray-600">
-            <div className="text-sm">预计消耗</div>
-            <div className="text-2xl font-bold" style={{ color: COLORS.PRIMARY }}>
-              {calculateCalories()} 千卡
-            </div>
-          </div>
-        )}
-
-        {/* Completed Message */}
-        {isCompleted && (
-          <div className="text-center text-green-500 font-medium">
-            已完成！
-          </div>
-        )}
       </div>
-
-      {/* Footer */}
-      {!isCompleted && (
-        <div className="absolute bottom-8">
-          <button
-            onClick={handleSkip}
-            className="px-6 py-2 rounded-lg text-gray-600 hover:text-gray-800 hover:bg-gray-100 transition-colors"
-          >
-            跳过
-          </button>
-        </div>
-      )}
     </div>
   );
 }

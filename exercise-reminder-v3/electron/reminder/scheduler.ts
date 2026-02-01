@@ -6,11 +6,13 @@ import { ReminderType, SchedulerState, TriggerEvent } from './types';
 
 /**
  * 提醒系统调度器
- * 管理三类提醒的独立调度，确保最小间隔2分钟
+ * 管理三类提醒的独立调度，确保全局最小间隔
  */
 export class ReminderScheduler {
   private timelines: Map<ReminderType, Timeline> = new Map();
   private windowManager: ReminderWindowManager;
+  private globalMinIntervalMs = 300 * 1000;
+  private lastTriggerTime = 0;
   private state: SchedulerState = {
     isRunning: false,
     isPaused: false,
@@ -60,7 +62,6 @@ export class ReminderScheduler {
 
     console.log('[ReminderScheduler] Starting...');
 
-    // 从数据库加载提醒设置
     const settings = this.queries.getReminderSettings();
     settings.forEach(setting => {
       const reminder = this.state.reminders[setting.type];
@@ -72,7 +73,16 @@ export class ReminderScheduler {
       }
     });
 
-    // 创建三个时间线
+    const globalIntervalSetting = this.queries.getSystemSetting('global_min_interval_sec');
+    if (globalIntervalSetting) {
+      const parsed = Number(globalIntervalSetting);
+      if (!Number.isNaN(parsed) && parsed >= 0) {
+        this.globalMinIntervalMs = parsed * 1000;
+      }
+    } else {
+      this.queries.setSystemSetting('global_min_interval_sec', String(this.globalMinIntervalMs / 1000));
+    }
+
     this.timelines.set('exercise', new Timeline(
       'exercise',
       this.state.reminders.exercise.intervalMin,
@@ -97,7 +107,6 @@ export class ReminderScheduler {
       (type) => this.handleTrigger(type)
     ));
 
-    // 调度所有时间线
     const now = Date.now();
     this.timelines.forEach((timeline, type) => {
       const nextTime = timeline.schedule(now);
@@ -114,13 +123,11 @@ export class ReminderScheduler {
   private async handleTrigger(type: ReminderType): Promise<void> {
     console.log(`[ReminderScheduler] Triggered: ${type}`);
 
-    // 如果暂停，不处理
     if (this.state.isPaused) {
       console.log('[ReminderScheduler] Paused, skipping trigger');
       return;
     }
 
-    // 获取用户信息
     const user = this.queries.getUserInfo();
     if (!user) {
       console.log('[ReminderScheduler] No user info found, skipping trigger');
@@ -133,7 +140,6 @@ export class ReminderScheduler {
       duration: this.state.reminders[type].duration
     };
 
-    // 如果是运动提醒，随机选择运动
     if (type === 'exercise') {
       const exercises = this.queries.getAllExercises();
       if (exercises.length === 0) {
@@ -146,18 +152,14 @@ export class ReminderScheduler {
       console.log(`[ReminderScheduler] Selected exercise: ${randomExercise.name} (MET: ${randomExercise.metValue})`);
     }
 
-    // 显示提醒窗口
     this.windowManager.showReminder(eventData);
 
-    // 重新调度该时间线，确保最小间隔2分钟
-    const minInterval = 2 * 60 * 1000; // 2分钟最小间隔
-    const earliestTime = Date.now() + minInterval;
-
-    const timeline = this.timelines.get(type);
-    if (timeline) {
+    this.lastTriggerTime = Date.now();
+    const earliestTime = this.lastTriggerTime + this.globalMinIntervalMs;
+    this.timelines.forEach((timeline, reminderType) => {
       const nextTime = timeline.schedule(earliestTime);
-      console.log(`[ReminderScheduler] ${type} rescheduled, next trigger: ${new Date(nextTime).toLocaleString()}`);
-    }
+      console.log(`[ReminderScheduler] ${reminderType} rescheduled, next trigger: ${new Date(nextTime).toLocaleString()}`);
+    });
   }
 
   /**
@@ -197,10 +199,22 @@ export class ReminderScheduler {
     const timeline = this.timelines.get(type);
     if (timeline) {
       timeline.updateParams(intervalMin, intervalMax, duration);
-      // 重新调度该时间线
       const nextTime = timeline.schedule(Date.now());
       console.log(`[ReminderScheduler] ${type} rescheduled with new params: ${new Date(nextTime).toLocaleString()}`);
     }
+  }
+
+  /**
+   * 更新全局最小间隔
+   */
+  updateGlobalMinInterval(seconds: number): void {
+    const safeSeconds = Math.max(0, Math.floor(seconds));
+    this.globalMinIntervalMs = safeSeconds * 1000;
+    const earliestTime = Math.max(Date.now(), this.lastTriggerTime + this.globalMinIntervalMs);
+    this.timelines.forEach((timeline, reminderType) => {
+      const nextTime = timeline.schedule(earliestTime);
+      console.log(`[ReminderScheduler] ${reminderType} rescheduled with global min interval: ${new Date(nextTime).toLocaleString()}`);
+    });
   }
 
   /**

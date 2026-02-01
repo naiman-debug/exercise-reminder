@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useUserStore } from '../store/useUserStore';
 import { useSettingsStore } from '../store/useSettingsStore';
 import { useExerciseStore } from '../store/useExerciseStore';
@@ -6,12 +6,24 @@ import { GENDER, DEFAULTS, COLORS, INTENSITY_LEVELS } from '../constants';
 import { Exercise, ReminderSettings } from '../types';
 
 export default function Settings() {
-  const { userInfo, saveUserInfo } = useUserStore();
-  const { reminderSettings, fetchReminderSettings, updateReminderSettings } = useSettingsStore();
+  const { userInfo, saveUserInfo, fetchUserInfo } = useUserStore();
+  const {
+    reminderSettings,
+    fetchReminderSettings,
+    updateReminderSettingsBatch,
+    fetchAutoStartSetting,
+    setAutoStartEnabled,
+    autoStartEnabled,
+    globalMinIntervalSec,
+    fetchGlobalMinInterval,
+    setGlobalMinInterval,
+  } = useSettingsStore();
   const { exercises, fetchAllExercises, addExercise, deleteExercise } = useExerciseStore();
   const [activeTab, setActiveTab] = useState<'profile' | 'reminder' | 'exercise'>('profile');
+  const [draftSettings, setDraftSettings] = useState<ReminderSettings[]>([]);
+  const [statusMessage, setStatusMessage] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [draftGlobalMinInterval, setDraftGlobalMinInterval] = useState<number>(globalMinIntervalSec);
 
-  // 表单状态
   const [formData, setFormData] = useState<{
     height: number;
     weight: number;
@@ -31,13 +43,15 @@ export default function Settings() {
   const [newExercise, setNewExercise] = useState({ name: '', metValue: 5, intensity: INTENSITY_LEVELS.MEDIUM });
 
   useEffect(() => {
-    // 加载数据
     const loadData = async () => {
+      await fetchUserInfo();
       await fetchReminderSettings();
       await fetchAllExercises();
+      await fetchAutoStartSetting();
+      await fetchGlobalMinInterval();
     };
     loadData();
-  }, [fetchReminderSettings, fetchAllExercises]);
+  }, [fetchUserInfo, fetchReminderSettings, fetchAllExercises, fetchAutoStartSetting, fetchGlobalMinInterval]);
 
   useEffect(() => {
     if (userInfo) {
@@ -52,28 +66,56 @@ export default function Settings() {
     }
   }, [userInfo]);
 
+  useEffect(() => {
+    setDraftSettings(reminderSettings);
+  }, [reminderSettings]);
+
+  useEffect(() => {
+    setDraftGlobalMinInterval(globalMinIntervalSec);
+  }, [globalMinIntervalSec]);
+
   const handleSaveProfile = async () => {
     await saveUserInfo(formData);
-    alert('个人信息已保存');
+    setStatusMessage({ message: '个人信息已保存', type: 'success' });
   };
 
-  const handleUpdateReminderSettings = async (type: 'exercise' | 'gaze' | 'stand', settings: ReminderSettings) => {
-    await updateReminderSettings(settings);
-    alert('提醒设置已更新');
+  const handleSaveAllReminderSettings = async () => {
+    let didSwap = false;
+    const normalizedSettings = draftSettings.map((item) => {
+      if (item.intervalMin > item.intervalMax) {
+        didSwap = true;
+        return {
+          ...item,
+          intervalMin: item.intervalMax,
+          intervalMax: item.intervalMin,
+        };
+      }
+      return item;
+    });
+
+    setDraftSettings(normalizedSettings);
+    await updateReminderSettingsBatch(normalizedSettings);
+    await setGlobalMinInterval(draftGlobalMinInterval);
+    setStatusMessage({
+      message: didSwap ? '提醒设置已保存（已自动纠正区间）' : '提醒设置已保存',
+      type: 'success',
+    });
   };
 
   const handleAddExercise = async () => {
     if (!newExercise.name) {
-      alert('请输入运动名称');
+      setStatusMessage({ message: '请输入运动名称', type: 'error' });
       return;
     }
     await addExercise(newExercise as any);
     setNewExercise({ name: '', metValue: 5, intensity: INTENSITY_LEVELS.MEDIUM });
+    setStatusMessage({ message: '运动已添加', type: 'success' });
   };
 
   const handleDeleteExercise = async (id: number) => {
     if (confirm('确定要删除这个运动吗？')) {
       await deleteExercise(id);
+      setStatusMessage({ message: '运动已删除', type: 'success' });
     }
   };
 
@@ -103,10 +145,27 @@ export default function Settings() {
     }
   };
 
+  const getReminderHint = (settingType: 'exercise' | 'gaze' | 'stand') => {
+    const current = draftSettings.find((item) => item.type === settingType);
+    if (!current) return '在 X-Y 分钟内随机触发';
+    return `在 ${current.intervalMin}-${current.intervalMax} 分钟内随机触发`;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#1a1a2e] to-[#16213e] text-white">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        {/* Header */}
+        {statusMessage && (
+          <div
+            data-testid="status-toast"
+            className={`mb-4 rounded-lg px-4 py-2 text-sm font-medium border ${
+              statusMessage.type === 'success'
+                ? 'bg-green-500 bg-opacity-20 border-green-300 text-green-100'
+                : 'bg-red-500 bg-opacity-20 border-red-300 text-red-100'
+            }`}
+          >
+            {statusMessage.message}
+          </div>
+        )}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-bold">设置</h1>
           <button
@@ -118,7 +177,6 @@ export default function Settings() {
           </button>
         </div>
 
-        {/* Tabs */}
         <div className="flex gap-2 mb-6">
           <button
             onClick={() => setActiveTab('profile')}
@@ -135,6 +193,7 @@ export default function Settings() {
               activeTab === 'reminder' ? 'bg-opacity-100' : 'bg-opacity-20'
             }`}
             style={{ backgroundColor: activeTab === 'reminder' ? COLORS.PRIMARY : `${COLORS.PRIMARY}40` }}
+            data-testid="tab-reminder"
           >
             ⏰ 提醒设置
           </button>
@@ -144,12 +203,12 @@ export default function Settings() {
               activeTab === 'exercise' ? 'bg-opacity-100' : 'bg-opacity-20'
             }`}
             style={{ backgroundColor: activeTab === 'exercise' ? COLORS.PRIMARY : `${COLORS.PRIMARY}40` }}
+            data-testid="tab-exercise"
           >
             🏋️ 运动库
           </button>
         </div>
 
-        {/* Tab Content */}
         <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-6 border border-white border-opacity-20">
           {activeTab === 'profile' && (
             <div>
@@ -223,13 +282,6 @@ export default function Settings() {
                   <span className="text-sm opacity-60">大卡</span>
                 </div>
 
-                <button
-                  onClick={handleSaveProfile}
-                  className="w-full py-3 rounded-lg font-medium"
-                  style={{ backgroundColor: COLORS.PRIMARY }}
-                >
-                  保存
-                </button>
               </div>
             </div>
           )}
@@ -238,7 +290,27 @@ export default function Settings() {
             <div>
               <h2 className="text-xl font-bold mb-6">提醒设置</h2>
               <div className="space-y-6">
-                {reminderSettings.map((setting) => (
+                <div className="bg-white bg-opacity-5 rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xl">⏱️</span>
+                    <h3 className="font-bold">全局最小提醒间隔</h3>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      min={0}
+                      value={draftGlobalMinInterval}
+                      onChange={(e) => setDraftGlobalMinInterval(Number(e.target.value))}
+                      data-testid="global-min-interval"
+                      className="w-28 px-3 py-2 rounded bg-white bg-opacity-10 border border-white border-opacity-20 text-white text-center"
+                    />
+                    <span className="text-sm opacity-60">秒</span>
+                  </div>
+                  <div className="text-xs opacity-60 mt-2">
+                    任意两次提醒之间至少间隔以上秒数（用于避免提醒连发）
+                  </div>
+                </div>
+                {draftSettings.map((setting) => (
                   <div key={setting.type} className="bg-white bg-opacity-5 rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-4">
                       <span className="text-2xl">
@@ -256,29 +328,30 @@ export default function Settings() {
                           type="number"
                           value={setting.intervalMin}
                           onChange={(e) => {
-                            const newSettings = [...reminderSettings];
+                            const newSettings = [...draftSettings];
                             const idx = newSettings.findIndex((s) => s.type === setting.type);
                             newSettings[idx].intervalMin = Number(e.target.value);
-                            // @ts-ignore
-                            updateReminderSettings(setting.type, newSettings[idx]);
+                            setDraftSettings(newSettings);
                           }}
+                          data-testid={`interval-min-${setting.type}`}
                           className="w-20 px-3 py-2 rounded bg-white bg-opacity-10 border border-white border-opacity-20 text-white text-center"
                         />
-                        <span className="text-sm">—</span>
+                        <span className="text-sm">–</span>
                         <input
                           type="number"
                           value={setting.intervalMax}
                           onChange={(e) => {
-                            const newSettings = [...reminderSettings];
+                            const newSettings = [...draftSettings];
                             const idx = newSettings.findIndex((s) => s.type === setting.type);
                             newSettings[idx].intervalMax = Number(e.target.value);
-                            // @ts-ignore
-                            updateReminderSettings(setting.type, newSettings[idx]);
+                            setDraftSettings(newSettings);
                           }}
+                          data-testid={`interval-max-${setting.type}`}
                           className="w-20 px-3 py-2 rounded bg-white bg-opacity-10 border border-white border-opacity-20 text-white text-center"
                         />
                         <span className="text-sm opacity-60">分钟</span>
                       </div>
+                      <div className="text-xs opacity-60">{getReminderHint(setting.type)}</div>
 
                       <div className="flex items-center gap-2">
                         <label className="w-24 text-sm">单次时长</label>
@@ -286,11 +359,10 @@ export default function Settings() {
                           type="number"
                           value={setting.duration}
                           onChange={(e) => {
-                            const newSettings = [...reminderSettings];
+                            const newSettings = [...draftSettings];
                             const idx = newSettings.findIndex((s) => s.type === setting.type);
                             newSettings[idx].duration = Number(e.target.value);
-                            // @ts-ignore
-                            updateReminderSettings(setting.type, newSettings[idx]);
+                            setDraftSettings(newSettings);
                           }}
                           className="w-20 px-3 py-2 rounded bg-white bg-opacity-10 border border-white border-opacity-20 text-white text-center"
                         />
@@ -307,7 +379,6 @@ export default function Settings() {
             <div>
               <h2 className="text-xl font-bold mb-6">运动库</h2>
 
-              {/* 添加运动 */}
               <div className="bg-white bg-opacity-5 rounded-lg p-4 mb-6">
                 <h3 className="font-bold mb-4">添加运动</h3>
                 <div className="flex gap-2">
@@ -335,7 +406,6 @@ export default function Settings() {
                 </div>
               </div>
 
-              {/* 运动列表 */}
               <div className="space-y-2">
                 {exercises.map((exercise) => (
                   <div
@@ -366,8 +436,47 @@ export default function Settings() {
                   </div>
                 ))}
               </div>
+
+              <div className="mt-6 flex items-center justify-between bg-white bg-opacity-5 rounded-lg px-4 py-3 border border-white border-opacity-10">
+                <span className="font-medium">开机自启动</span>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
+                    checked={autoStartEnabled}
+                    onChange={(e) => setAutoStartEnabled(e.target.checked)}
+                    data-testid="auto-start-toggle"
+                  />
+                  <div className="w-11 h-6 bg-white bg-opacity-20 peer-focus:outline-none rounded-full peer peer-checked:bg-opacity-100 peer-checked:bg-gradient-to-r peer-checked:from-purple-500 peer-checked:to-purple-400 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full" />
+                </label>
+              </div>
             </div>
           )}
+        </div>
+
+        <div className="mt-6 flex gap-3 justify-end">
+          <button
+            onClick={() => window.location.hash = '#/'}
+            className="px-4 py-2 rounded-lg text-sm font-medium border border-white border-opacity-30"
+          >
+            取消
+          </button>
+          <button
+            onClick={async () => {
+              if (activeTab === 'profile') {
+                await handleSaveProfile();
+              } else if (activeTab === 'reminder') {
+                await handleSaveAllReminderSettings();
+              } else {
+                setStatusMessage({ message: '设置已保存', type: 'success' });
+              }
+            }}
+            className="px-4 py-2 rounded-lg text-sm font-medium"
+            style={{ backgroundColor: COLORS.PRIMARY }}
+            data-testid="footer-save"
+          >
+            保存设置
+          </button>
         </div>
       </div>
     </div>

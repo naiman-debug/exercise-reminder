@@ -1,8 +1,50 @@
 # 游戏开发指南
 
 > **用途**：使用 Claude Code + AI 团队进行游戏开发
-> **更新日期**：2026-01-19
-> **适用引擎**：Godot 4.x
+> **更新日期**：2026-02-01
+> **适用引擎**：Godot 4.x / Unity / Unreal
+> **数据来源**：[INFRA.md](../INFRA.md)
+
+---
+
+## 🎮 两种开发方式
+
+### 方式 1：BMAD GDS 🌟 推荐
+
+**BMAD GDS（游戏开发套件）** 是专门为游戏开发设计的工作流框架。
+
+**优势**：
+- ✅ 专为游戏开发设计
+- ✅ 完整的游戏开发流程
+- ✅ 专业化 Agent（游戏架构师、游戏设计师、游戏开发者）
+- ✅ 支持 Unity、Unreal、Godot
+
+**核心工作流**：
+| 工作流 | 用途 | 命令 |
+|--------|------|------|
+| 游戏简报 | 游戏概念文档 | `/bmad-gds-create-game-brief` |
+| 游戏设计文档 | 完整 GDD | `/bmad-gds-create-gdd` |
+| 游戏架构 | 技术架构设计 | `/bmad-gds-game-architecture` |
+| Sprint 规划 | 游戏开发 Sprint | `/bmad-gds-sprint-planning` |
+| 功能开发 | 游戏功能实现 | `/bmad-gds-dev-story` |
+| 游戏测试 | 完整测试流程 | `/bmad-gds-gametest-*` |
+
+**详细文档**：[BMAD 操作手册](BMAD_MANUAL.md#gds-游戏开发团队)
+
+---
+
+### 方式 2：传统 Superpowers 方式
+
+使用 Superpowers 插件进行游戏开发，适合较简单的项目。
+
+**工具组合**：
+- brainstorming - 游戏设计创意
+- writing-plans - 技术规划
+- frontend-design - UI/UX 设计
+- feature-dev - 功能开发
+- code-review - 代码审查
+
+**本指南**主要介绍这种方式。
 
 ---
 
@@ -36,6 +78,7 @@
 
 | 工具 | 角色 | 负责内容 |
 |------|------|----------|
+| **BMAD GDS** 🌟 | 游戏开发团队 | 完整游戏开发流程 |
 | **superpowers: brainstorming** | 游戏设计师 | 游戏玩法创意、机制设计、关卡设计 |
 | **superpowers: writing-plans** | 技术策划 | 技术架构、实现计划、任务分解 |
 | **frontend-design** | UI/UX 设计师 | 游戏界面、菜单、HUD、交互流程 |
@@ -44,6 +87,7 @@
 
 | 工具 | 角色 | 负责内容 |
 |------|------|----------|
+| **BMAD GDS: Dev** 🌟 | 游戏开发者 | 游戏功能实现、引擎集成 |
 | **feature-dev** | 功能开发者 | 快速实现功能、编写 GDScript、调试代码 |
 | **Godot MCP** | Godot 操作员 | 创建场景、添加节点、配置资源、运行项目 |
 | **superpowers: executing** | 项目经理 | 执行开发计划、代码审查、测试验证 |
@@ -53,6 +97,7 @@
 | 工具 | 角色 | 负责内容 |
 |------|------|----------|
 | **code-review** | 代码审查员 | 代码质量、性能优化、最佳实践 |
+| **BMAD GDS: QA** 🌟 | 游戏测试 | 游戏测试、性能测试、Playtest |
 | **superpowers: TDD** | 测试工程师 | 测试用例、功能验证 |
 
 ---

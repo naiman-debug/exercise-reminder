@@ -3,13 +3,14 @@ import Home from './pages/Home';
 import Settings from './pages/Settings';
 import ReminderModal from './pages/ReminderModal';
 import Celebration from './pages/Celebration';
+import { normalizeHash } from './utils/hash';
 
 function App() {
-  const [currentHash, setCurrentHash] = useState(window.location.hash || '#/');
+  const [currentHash, setCurrentHash] = useState(normalizeHash(window.location.hash));
 
   useEffect(() => {
     const handleHashChange = () => {
-      setCurrentHash(window.location.hash || '#/');
+      setCurrentHash(normalizeHash(window.location.hash));
     };
 
     window.addEventListener('hashchange', handleHashChange);

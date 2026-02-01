@@ -35,6 +35,10 @@ export const IPC_CHANNELS = {
   // ===== 系统功能 =====
   GET_SYSTEM_SETTING: 'get-system-setting',
   SET_SYSTEM_SETTING: 'set-system-setting',
+  GET_AUTO_START: 'get-auto-start',
+  SET_AUTO_START: 'set-auto-start',
+  GET_GLOBAL_MIN_INTERVAL: 'get-global-min-interval',
+  SET_GLOBAL_MIN_INTERVAL: 'set-global-min-interval',
 
   // ===== 窗口控制 =====
   SHOW_MAIN_WINDOW: 'show-main-window',

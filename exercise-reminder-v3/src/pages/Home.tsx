@@ -6,38 +6,41 @@ import { useSettingsStore } from '../store/useSettingsStore';
 import { COLORS } from '../constants';
 
 export default function Home() {
-  const { userInfo, fetchUserInfo } = useUserStore();
-  const { todayStats, fetchTodayStats } = useStatsStore();
+  const { userInfo, fetchUserInfo, updateWeight } = useUserStore();
+  const { todayStats, historyStats, fetchTodayStats, fetchHistoryStats } = useStatsStore();
   const { todayActivities, fetchActivitiesByDate } = useActivityStore();
   const { reminderStatus, pauseReminders, resumeReminders } = useSettingsStore();
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [isEditingWeight, setIsEditingWeight] = useState(false);
+  const [weightDraft, setWeightDraft] = useState('');
 
   useEffect(() => {
-    // 加载数据
     const loadData = async () => {
       await fetchUserInfo();
       const today = new Date().toISOString().split('T')[0];
       await fetchTodayStats(today);
+      await fetchHistoryStats();
       await fetchActivitiesByDate(today);
     };
 
     loadData();
 
-    // 每分钟刷新一次
     const interval = setInterval(() => {
       setCurrentDate(new Date());
       loadData();
     }, 60000);
 
     return () => clearInterval(interval);
-  }, [fetchUserInfo, fetchTodayStats, fetchActivitiesByDate]);
+  }, [fetchUserInfo, fetchTodayStats, fetchHistoryStats, fetchActivitiesByDate]);
 
   const handleUpdateWeight = async () => {
-    const newWeight = prompt('请输入当前体重（kg）：');
-    if (newWeight && !isNaN(Number(newWeight))) {
-      await useUserStore.getState().updateWeight(Number(newWeight));
-      await fetchTodayStats(new Date().toISOString().split('T')[0]);
+    const parsed = Number(weightDraft);
+    if (!weightDraft || Number.isNaN(parsed)) {
+      return;
     }
+    await updateWeight(parsed);
+    await fetchTodayStats(new Date().toISOString().split('T')[0]);
+    setIsEditingWeight(false);
   };
 
   const handleTogglePause = async () => {
@@ -61,7 +64,6 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#1a1a2e] to-[#16213e] text-white">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-bold">健康提醒助手</h1>
           <div className="flex gap-2">
@@ -72,21 +74,20 @@ export default function Home() {
                 backgroundColor: reminderStatus.isPaused ? COLORS.SUCCESS : COLORS.WARNING,
               }}
             >
-              {reminderStatus.isPaused ? '▶ 恢复提醒' : '⏸ 暂停提醒'}
+              {reminderStatus.isPaused ? '▶️ 恢复提醒' : '⏸ 暂停提醒'}
             </button>
             <button
               onClick={() => window.location.hash = '#/settings'}
               className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
               style={{ backgroundColor: `${COLORS.PRIMARY}40` }}
             >
-              ⚙ 设置
+              ⚙️ 设置
             </button>
           </div>
         </div>
 
-        {/* Today's Progress Card */}
         <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-6 mb-6 border border-white border-opacity-20">
-          <h2 className="text-xl font-bold mb-4">🔥 今日目标进度</h2>
+          <h2 className="text-xl font-bold mb-4">🎯 今日目标进度</h2>
 
           <div className="mb-4">
             <div className="flex justify-between mb-2">
@@ -113,23 +114,50 @@ export default function Home() {
             </div>
             <div className="bg-white bg-opacity-5 rounded-lg p-4">
               <div className="text-sm opacity-80 mb-1">⚖️ 当前体重</div>
-              <div className="flex items-center justify-between">
-                <span className="text-2xl font-bold">{userInfo?.weight || 0} kg</span>
-                <button
-                  onClick={handleUpdateWeight}
-                  className="px-3 py-1 rounded text-xs font-medium"
-                  style={{ backgroundColor: `${COLORS.PRIMARY}40` }}
-                >
-                  更新
-                </button>
-              </div>
+              {!isEditingWeight ? (
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl font-bold">{userInfo?.weight || 0} kg</span>
+                  <button
+                    onClick={() => {
+                      setWeightDraft(String(userInfo?.weight || ''));
+                      setIsEditingWeight(true);
+                    }}
+                    className="px-3 py-1 rounded text-xs font-medium"
+                    style={{ backgroundColor: `${COLORS.PRIMARY}40` }}
+                  >
+                    更新
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    value={weightDraft}
+                    onChange={(e) => setWeightDraft(e.target.value)}
+                    data-testid="weight-input"
+                    className="w-24 px-2 py-1 rounded bg-white bg-opacity-10 border border-white border-opacity-20 text-white text-sm"
+                  />
+                  <button
+                    onClick={handleUpdateWeight}
+                    className="px-3 py-1 rounded text-xs font-medium"
+                    style={{ backgroundColor: `${COLORS.PRIMARY}` }}
+                  >
+                    保存
+                  </button>
+                  <button
+                    onClick={() => setIsEditingWeight(false)}
+                    className="px-3 py-1 rounded text-xs font-medium border border-white border-opacity-30"
+                  >
+                    取消
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Today's Activities */}
         <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-6 mb-6 border border-white border-opacity-20">
-          <h2 className="text-xl font-bold mb-4">📋 今日活动详情</h2>
+          <h2 className="text-xl font-bold mb-4">🧾 今日活动详情</h2>
           <div className="space-y-2">
             {todayActivities.length === 0 ? (
               <div className="text-center text-sm opacity-60 py-8">暂无活动记录</div>
@@ -161,25 +189,24 @@ export default function Home() {
           </div>
         </div>
 
-        {/* History Stats */}
         <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-6 border border-white border-opacity-20">
-          <h2 className="text-xl font-bold mb-4">📊 历史数据</h2>
+          <h2 className="text-xl font-bold mb-4">📈 历史数据</h2>
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center">
               <div className="text-2xl font-bold" style={{ color: COLORS.PRIMARY_LIGHT }}>
-                {todayStats?.totalCalories || 0}
+                {historyStats?.totalCalories || 0}
               </div>
               <div className="text-xs opacity-60 mt-1">累计消耗（大卡）</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold" style={{ color: COLORS.SUCCESS }}>
-                {todayStats?.streak || 0}
+                {historyStats?.totalStreak || 0}
               </div>
               <div className="text-xs opacity-60 mt-1">累计打卡（天）</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold" style={{ color: COLORS.INFO }}>
-                {userInfo && userInfo.initialWeight ? (userInfo.weight - userInfo.initialWeight).toFixed(1) : 0}
+                {historyStats ? historyStats.weightChange.delta.toFixed(1) : 0}
               </div>
               <div className="text-xs opacity-60 mt-1">体重变化（kg）</div>
             </div>

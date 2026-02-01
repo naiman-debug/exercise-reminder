@@ -34,8 +34,15 @@ F:\claude-code\docs/
 
 | 文档 | 说明 |
 |------|------|
-| [TOOL_SELECTION_GUIDE.md](TOOL_SELECTION_GUIDE.md) | **推荐** - 工具选择指南，快速找到合适的工具 |
-| [TOOLS_GUIDE.md](TOOLS_GUIDE.md) | Superpowers & OpenSpec 详细使用指南 |
+| [TOOLS_GUIDE.md](TOOLS_GUIDE.md) | **推荐首选** - 三大框架总览与选择指南 ⭐ 2026-02-01 更新 |
+| [BMAD_MANUAL.md](BMAD_MANUAL.md) | **新** - BMAD 全栈工作流框架操作手册（软件/游戏/测试） |
+| [SUPERPOWERS_MANUAL.md](SUPERPOWERS_MANUAL.md) | **新** - Superpowers 开发工作流操作手册（含案例） |
+| [OPENSPEC_MANUAL.md](OPENSPEC_MANUAL.md) | **新** - OpenSpec 规范管理操作手册（含案例） |
+| [TOOL_SELECTION_GUIDE.md](TOOL_SELECTION_GUIDE.md) | 基于实际测试验证的工具选择指南 |
+
+**测试验证数据源**：
+- [../TOOL-KNOWLEDGE/TOOLS-INDEX.md](../TOOL-KNOWLEDGE/TOOLS-INDEX.md) - 工具测试结果索引
+- [../TOOL-KNOWLEDGE/evaluations/](../TOOL-KNOWLEDGE/evaluations/) - 详细评估报告
 
 ### MCP 服务器
 

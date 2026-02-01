@@ -8,23 +8,31 @@
   "scripts": {
     "dev": "concurrently \"npm run dev:vite\" \"npm run dev:electron\"",
     "dev:vite": "vite",
-    "dev:electron": "wait-on -t 30000 http://127.0.0.1:5173 && cross-env NODE_ENV=development electron .",
+    "dev:electron": "npm run build:main && wait-on -t 30000 http://127.0.0.1:5173 && cmd /c \"set NODE_ENV=development& set ELECTRON_RUN_AS_NODE=& electron .\"",
     "build": "npm run build:renderer && npm run build:main",
     "build:renderer": "vite build",
     "build:main": "tsc -p tsconfig.electron.json",
     "package": "npm run build && electron-builder",
     "package:win": "npm run build && electron-builder --win",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "jest --config ./jest.config.cjs",
+    "test:watch": "jest --config ./jest.config.cjs --watch",
+    "prepare": "husky"
   },
   "dependencies": {
     "auto-launch": "^5.0.6",
     "better-sqlite3": "^11.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "zod": "^4.3.6",
     "zustand": "^4.5.0"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/better-sqlite3": "^7.6.9",
+    "@types/jest": "^30.0.0",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.2.1",
@@ -33,10 +41,20 @@
     "cross-env": "^10.1.0",
     "electron": "^33.4.11",
     "electron-builder": "^24.13.0",
+    "electron-devtools-installer": "^4.0.0",
+    "husky": "^9.1.7",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^30.2.0",
+    "jest-environment-jsdom": "^30.2.0",
     "postcss": "^8.4.0",
+    "react-devtools": "^7.0.1",
     "tailwindcss": "^3.4.0",
+    "ts-jest": "^29.4.6",
     "typescript": "^5.4.0",
     "vite": "^5.2.0",
     "wait-on": "^8.0.0"
+  },
+  "jest": {
+    "config": "./jest.config.cjs"
   }
 }

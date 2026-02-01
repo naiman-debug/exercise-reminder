@@ -1,3 +1,6 @@
+# 获取项目根目录（Husky hooks 的脚本所在目录）
+cd "$(dirname "$0")/.." || exit 1
+
 # 获取 commit 信息
 commit_hash=$(git rev-parse HEAD)
 commit_author=$(git log -1 --format='%an')

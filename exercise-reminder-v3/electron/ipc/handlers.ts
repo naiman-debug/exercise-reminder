@@ -1,4 +1,4 @@
-import { ipcMain, BrowserWindow } from 'electron';
+import { ipcMain, BrowserWindow, app } from 'electron';
 import path from 'path';
 import { IPC_CHANNELS } from './channels';
 import { getDatabase } from '../database/db';
@@ -182,6 +182,42 @@ export function registerIPCHandlers(scheduler?: ReminderScheduler) {
 
   ipcMain.handle(IPC_CHANNELS.SET_SYSTEM_SETTING, (_, key: string, value: string) => {
     return queries.setSystemSetting(key, value);
+  });
+
+  ipcMain.handle(IPC_CHANNELS.GET_GLOBAL_MIN_INTERVAL, () => {
+    const stored = queries.getSystemSetting('global_min_interval_sec');
+    if (stored === null) {
+      queries.setSystemSetting('global_min_interval_sec', '300');
+      return 300;
+    }
+    const parsed = Number(stored);
+    return Number.isNaN(parsed) ? 300 : parsed;
+  });
+
+  ipcMain.handle(IPC_CHANNELS.SET_GLOBAL_MIN_INTERVAL, (_, seconds: number) => {
+    const safeSeconds = Math.max(0, Math.floor(seconds));
+    queries.setSystemSetting('global_min_interval_sec', String(safeSeconds));
+    if (globalScheduler) {
+      globalScheduler.updateGlobalMinInterval(safeSeconds);
+    }
+    return safeSeconds;
+  });
+
+  ipcMain.handle(IPC_CHANNELS.GET_AUTO_START, () => {
+    const login = app.getLoginItemSettings();
+    const stored = queries.getSystemSetting('auto_start_enabled');
+
+    if (stored === null) {
+      queries.setSystemSetting('auto_start_enabled', login.openAtLogin ? 'true' : 'false');
+    }
+
+    return login.openAtLogin;
+  });
+
+  ipcMain.handle(IPC_CHANNELS.SET_AUTO_START, (_, enabled: boolean) => {
+    app.setLoginItemSettings({ openAtLogin: enabled });
+    queries.setSystemSetting('auto_start_enabled', enabled ? 'true' : 'false');
+    return enabled;
   });
 
   // ===== 窗口控制 =====

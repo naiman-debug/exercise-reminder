@@ -1,6 +1,24 @@
 # 开发流程工具选择指南
 
 > **用途**：帮助快速选择合适的开发工具
+>
+> **数据来源**：基于 TOOL-KNOWLEDGE 目录的实际测试验证结果
+
+---
+
+## 📊 工具评分概览
+
+> ⭐⭐⭐⭐⭐ 强烈推荐 | ⭐⭐⭐ 中等推荐 | ⭐ 低分不推荐
+
+| 工具 | 评分 | 类型 | 核心用途 |
+|------|------|------|----------|
+| **code-review** | 100/100 | Skill | 代码审查专家（主工具） |
+| **test-driven-development** | 90.85% | Skill | TDD 测试驱动开发 |
+| **chrome-devtools** | 91.25% | MCP | Web 自动化测试 |
+| **brainstorming** | 85/100 | Skill | 问题分析和需求细化 |
+| **security-review** | 76% | Skill | 安全检查清单 |
+| **mcp__cclsp** | 73.6% | MCP | 代码导航（Serena 替代） |
+| **backend-patterns** | 16.95/100 | Skill | ❌ 不推荐（已淘汰） |
 
 ---
 
@@ -11,23 +29,25 @@
     │
     ├─ 类型判断
     │   │
-    │   ├─ 【需求分析/项目立项】
-    │   │   └─> agent-skills (doc-organizer + business-analyst)
+    │   ├─ 【需求分析/问题诊断】
+    │   │   └─> brainstorming ⭐⭐⭐⭐⭐ (85/100)
     │   │
     │   ├─ 【规范管理/提案审批】
     │   │   └─> OpenSpec
     │   │
     │   ├─ 【功能开发/代码实现】
     │   │   │
-    │   │   ├─ 简单功能 → feature-dev
+    │   │   ├─ TDD 开发 → test-driven-development ⭐⭐⭐⭐⭐
+    │   │   ├─ 前端测试 → chrome-devtools ⭐⭐⭐⭐⭐
     │   │   ├─ 完整项目 → superpowers
-    │   │   └─ 前端界面 → frontend-design
+    │   │   └─ 代码导航 → mcp__cclsp ⭐⭐⭐
     │   │
     │   ├─ 【代码审查/质量检查】
-    │   │   └─> code-review
+    │   │   └─> code-review ⭐⭐⭐⭐⭐ (100/100)
+    │   │       └─ security-review ⭐⭐⭐⭐ (76%) 补充
     │   │
-    │   └─ 【其他】
-    │       └─> 根据具体需求判断
+    │   └─ 【项目立项/可行性分析】
+    │       └─> agent-skills (doc-organizer + business-analyst)
     │
     ▼
 使用推荐工具 ✓
@@ -37,23 +57,174 @@
 
 ## 📋 工具对比表
 
-### 按任务类型选择
+### 按任务类型选择（基于测试评分）
 
-| 任务类型 | 推荐工具 | 调用方式 | 说明 |
-|----------|----------|----------|------|
-| **需求分析** | agent-skills | 自动技能 | doc-organizer + business-analyst |
-| **项目立项** | agent-skills | 自动技能 | 完整的可行性分析流程 |
-| **规范提案** | OpenSpec | 自动触发 | 重要变更需要规范审批 |
-| **简单功能** | feature-dev | `/feature-dev` | 快速实现单个功能 |
-| **完整项目** | superpowers | 自动技能 | 系统化的开发流程 |
-| **前端设计** | frontend-design | `/frontend-design` | UI/UX 设计和代码生成 |
-| **代码审查** | code-review | `/code-review` | PR 代码审查 |
+| 任务类型 | 推荐工具 | 评分 | 调用方式 | 说明 |
+|----------|----------|------|----------|------|
+| **代码审查** | code-review | 100/100 | 自动技能 | ⭐⭐⭐⭐⭐ 主审查工具 |
+| **TDD 开发** | test-driven-development | 90.85% | 自动技能 | ⭐⭐⭐⭐⭐ 测试驱动开发 |
+| **前端测试** | chrome-devtools | 91.25% | MCP 工具 | ⭐⭐⭐⭐⭐ Web 自动化 |
+| **需求分析** | brainstorming | 85/100 | 自动技能 | ⭐⭐⭐⭐⭐ 问题根因分析 |
+| **安全检查** | security-review | 76% | 自动技能 | ⭐⭐⭐⭐ 安全清单 |
+| **代码导航** | mcp__cclsp | 73.6% | MCP 工具 | ⭐⭐⭐ 符号查找 |
+| **项目立项** | agent-skills | - | 自动技能 | 可行性分析流程 |
+| **规范提案** | OpenSpec | - | 自动触发 | 规范管理工具 |
+| **架构审查** | backend-patterns | 16.95/100 | ❌ | ❌ 不推荐使用 |
 
 ---
 
 ## 🛠️ 详细工具说明
 
-### 1. agent-skills - AI Agent 协作系统
+### 1. code-review ⭐⭐⭐⭐⭐ - 代码审查专家
+
+**评分**：100/100
+
+**适用场景**：
+- ✅ Pull Request 代码审查
+- ✅ TypeScript 类型检查
+- ✅ 安全漏洞识别
+- ✅ 性能问题分析
+
+**核心价值**：
+- ✅ 深度代码分析（类型、规范、性能）
+- ✅ 完美适配 Electron + React 项目
+- ✅ 全面超越 backend-patterns
+
+**位置**：`F:\claude-code\TOOL-KNOWLEDGE\evaluations\code-review-evaluation.md`
+
+**使用方式**：自动技能调用
+
+---
+
+### 2. test-driven-development ⭐⭐⭐⭐⭐ - TDD 测试驱动
+
+**评分**：90.85%
+
+**适用场景**：
+- ✅ 新功能开发（先写测试）
+- ✅ Bug 修复（编写复现测试）
+- ✅ 重构验证
+
+**核心价值**：
+- ✅ 严格遵循 TDD 原则
+- ✅ 测试质量高（93%）
+- ✅ Jest 集成完美
+
+**位置**：`F:\claude-code\TOOL-KNOWLEDGE\evaluations\test-driven-development-evaluation.md`
+
+**使用方式**：自动技能调用
+
+---
+
+### 3. chrome-devtools ⭐⭐⭐⭐⭐ - Web 自动化测试
+
+**评分**：91.25%（Web 功能）
+
+**适用场景**：
+- ✅ React 组件测试
+- ✅ UI 交互测试
+- ✅ 控制台调试
+- ✅ 网络监控
+
+**核心价值**：
+- ✅ React 组件测试专家
+- ✅ 性能优异（248ms 响应）
+- ✅ 易用性极佳
+
+**⚠️ 限制**：Electron 适配待补充
+
+**位置**：`F:\claude-code\TOOL-KNOWLEDGE\evaluations\chrome-devtools-evaluation.md`
+
+**使用方式**：MCP 工具调用
+
+---
+
+### 4. brainstorming ⭐⭐⭐⭐⭐ - 问题分析专家
+
+**评分**：85/100
+
+**适用场景**：
+- ✅ 新功能设计
+- ✅ 复杂问题根因分析
+- ✅ 架构规划
+
+**核心价值**：
+- ✅ 深入问题分析
+- ✅ 多维度思考
+- ✅ 测试通过率 100%
+
+**位置**：`F:\claude-code\TOOL-KNOWLEDGE\evaluations\brainstorming-evaluation.md`
+
+**使用方式**：自动技能调用
+
+---
+
+### 5. security-review ⭐⭐⭐⭐ - 安全检查清单
+
+**评分**：76%（真阳性率 100%）
+
+**适用场景**：
+- ✅ 有安全经验的开发者
+- ✅ Code Review 检查清单
+- ✅ 安全编码实践参考
+
+**核心价值**：
+- ✅ 100% 真阳性率
+- ✅ 发现 10 个真实安全问题
+- ✅ OWASP Top 10 覆盖
+
+**⚠️ 定位**：检查清单工具，非自动化扫描器
+
+**位置**：`F:\claude-code\TOOL-KNOWLEDGE\evaluations\security-review-evaluation.md`
+
+**使用方式**：自动技能调用
+
+---
+
+### 6. mcp__cclsp ⭐⭐⭐ - 代码导航工具
+
+**评分**：73.6%
+
+**适用场景**：
+- ✅ 日常代码导航
+- ✅ TypeScript 项目
+- ✅ Electron 项目
+
+**核心价值**：
+- ✅ 符号定义查找优秀（100分）
+- ✅ TypeScript 支持完美
+
+**核心限制**：
+- ⚠️ 引用查找有限（30分）
+- ⚠️ 不支持 IPC 追踪
+
+**位置**：`F:\claude-code\TOOL-KNOWLEDGE\evaluations\cclsp-evaluation.md`
+
+**使用方式**：MCP 工具调用
+
+---
+
+### 7. backend-patterns ⭐ - 架构审查（已淘汰）
+
+**评分**：16.95/100
+
+**核心问题**：
+- ❌ 参考文档系统，非代码分析工具
+- ❌ 无法主动分析代码
+- ❌ 不适合 Electron 项目
+
+**强烈替代方案**：
+- ✅ **code-review skill**（100/100）
+
+**适用场景**：
+- ⚠️ 仅适用于 Node.js 后端项目学习
+- ❌ Electron 项目不推荐
+
+**位置**：`F:\claude-code\TOOL-KNOWLEDGE\evaluations\backend-patterns-evaluation.md`
+
+---
+
+### 8. agent-skills - AI Agent 协作系统
 
 **适用场景**：
 - ✅ 项目立项可行性分析
@@ -152,78 +323,130 @@
 
 ## 💡 使用建议
 
-### 场景 1：新项目立项
+### 场景 1：新功能开发（TDD 流程）
 
 ```
-用户："我要做一个社交游戏项目"
+用户："添加用户评论功能"
+
+AI 检测 → 类型：功能开发
+推荐 → test-driven-development ⭐⭐⭐⭐⭐
+
+流程：
+1. test-driven-development (先写测试)
+2. 编写实现代码
+3. code-review (审查代码) ⭐⭐⭐⭐⭐
+4. chrome-devtools (UI 测试) ⭐⭐⭐⭐⭐
+```
+
+### 场景 2：问题诊断与修复
+
+```
+用户："这个 Bug 怎么修？"
+
+AI 检测 → 类型：问题分析
+推荐 → brainstorming ⭐⭐⭐⭐⭐
+
+流程：
+1. brainstorming (根因分析)
+2. mcp__cclsp (代码导航) ⭐⭐⭐
+3. test-driven-development (TDD 修复) ⭐⭐⭐⭐⭐
+4. chrome-devtools (运行验证) ⭐⭐⭐⭐⭐
+```
+
+### 场景 3：代码质量保障
+
+```
+用户："审查这段代码"
+
+AI 检测 → 类型：代码审查
+推荐 → code-review ⭐⭐⭐⭐⭐
+
+组合方案：
+1. code-review (主审查工具) ⭐⭐⭐⭐⭐
+2. security-review (安全补充) ⭐⭐⭐⭐
+3. test-driven-development (测试覆盖) ⭐⭐⭐⭐⭐
+```
+
+### 场景 4：新项目立项
+
+```
+用户："我要做一个新项目"
 
 AI 检测 → 类型：项目立项
 推荐 → agent-skills
 
 流程：
-1. doc-organizer (文档整理)
-2. business-analyst (商业分析)
-3. devil-advocate (批判审查)
-4. social-game-designer (玩法设计)
+1. brainstorming (需求分析) ⭐⭐⭐⭐⭐
+2. doc-organizer (文档整理)
+3. business-analyst (商业分析)
+4. devil-advocate (批判审查)
 ```
 
-### 场景 2：添加单个功能
+---
+
+## 🚀 推荐组合方案（基于测试验证）
+
+### 方案 1：Electron + React 项目标准流程
 
 ```
-用户："给这个项目添加用户评论功能"
-
-AI 检测 → 类型：功能开发
-推荐 → feature-dev
-
-命令：/feature-dev
+需求分析 → brainstorming ⭐⭐⭐⭐⭐
+     ↓
+TDD 开发 → test-driven-development ⭐⭐⭐⭐⭐
+     ↓
+代码导航 → mcp__cclsp ⭐⭐⭐
+     ↓
+代码审查 → code-review ⭐⭐⭐⭐⭐ + security-review ⭐⭐⭐⭐
+     ↓
+测试验证 → chrome-devtools ⭐⭐⭐⭐⭐
 ```
 
-### 场景 3：完整项目重构
+### 方案 2：代码质量保障三件套
 
 ```
-用户："重构这个项目的数据库层"
-
-AI 检测 → 类型：重要变更
-推荐 → superpowers + OpenSpec
-
-流程：
-1. OpenSpec (创建提案)
-2. superpowers (执行开发)
+┌─────────────────────────────────────┐
+│  代码质量保障（均通过验证）           │
+├─────────────────────────────────────┤
+│  code-review ⭐⭐⭐⭐⭐ (100/100)     │
+│  security-review ⭐⭐⭐⭐ (76%)        │
+│  test-driven-development ⭐⭐⭐⭐⭐    │
+└─────────────────────────────────────┘
 ```
 
-### 场景 4：设计前端页面
+### 方案 3：问题分析与调试完整流程
 
 ```
-用户："设计一个登录页面"
-
-AI 检测 → 类型：前端设计
-推荐 → frontend-design
-
-命令：/frontend-design
+问题发现 → brainstorming ⭐⭐⭐⭐⭐ (根因分析)
+     ↓
+代码定位 → mcp__cclsp ⭐⭐⭐ (符号导航)
+     ↓
+问题修复 → test-driven-development ⭐⭐⭐⭐⭐ (TDD 修复)
+     ↓
+验证测试 → chrome-devtools ⭐⭐⭐⭐⭐ (运行验证)
+     ↓
+质量检查 → code-review ⭐⭐⭐⭐⭐ (最终审查)
 ```
 
 ---
 
 ## 🎯 快速命令参考
 
-### Plugin 命令
-
-```bash
-# 功能开发
-/feature-dev
-
-# 前端设计
-/frontend-design
-
-# 代码审查
-/code-review
-```
-
-### 技能调用
+### Skill 自动调用（推荐）
 
 ```
-# 技能会自动调用，无需手动
-# AI 会根据任务类型选择合适的技能
+# 高分工具会自动调用，优先级按评分排序
+1. code-review ⭐⭐⭐⭐⭐ - 代码审查
+2. test-driven-development ⭐⭐⭐⭐⭐ - TDD 开发
+3. chrome-devtools ⭐⭐⭐⭐⭐ - Web 测试
+4. brainstorming ⭐⭐⭐⭐⭐ - 问题分析
+5. security-review ⭐⭐⭐⭐ - 安全检查
+```
+
+### MCP 工具调用
+
+```
+# 需要 MCP 配置
+- mcp__cclsp - 代码导航
+- chrome-devtools - 浏览器自动化
 ```
 
 ---
@@ -232,20 +455,19 @@ AI 检测 → 类型：前端设计
 
 ```
 ┌─────────────────────────────────────────┐
-│  当前任务不适合当前工具？               │
-│                                         │
-│  告诉 AI："切换到 [工具名称]"           │
+│  需要特定工具？直接告诉 AI               │
 │                                         │
 │  示例：                                  │
-│  "切换到 feature-dev"                    │
-│  "使用 superpowers 流程"                 │
-│  "调用 code-review"                     │
+│  "使用 code-review 审查这段代码"         │
+│  "用 brainstorming 分析这个问题"         │
+│  "调用 TDD 流程开发这个功能"             │
+│  "用 chrome-devtools 测试这个组件"       │
 └─────────────────────────────────────────┘
 ```
 
 ---
 
-## 📊 决策流程图
+## 📊 决策流程图（更新版）
 
 ```
                     接收任务
@@ -255,43 +477,56 @@ AI 检测 → 类型：前端设计
               │  任务类型是什么？  │
               └────────┬─────────┘
                        │
-       ┌───────────────┼───────────────┐
-       │               │               │
-   项目立项        规范提案        功能开发
-       │               │               │
-       ▼               ▼               ▼
- agent-skills     OpenSpec      ┌─────┴────┐
-                                │          │
-                            简单        复杂
-                                │          │
-                                ▼          ▼
-                           feature-dev  superpowers
-       │               │               │
-       └───────────────┴───────────────┘
-                       │
-                       ▼
-                   执行任务 ✓
+       ┌───────────────┼───────────────┬─────────────┐
+       │               │               │             │
+   项目立项        问题分析        功能开发      代码审查
+       │               │               │             │
+       ▼               ▼               ▼             ▼
+ agent-skills    brainstorming    test-driven   code-review
+                       │           development    security-review
+                       │               │         (100/100)
+                       │               ▼             │
+                       │         ┌─────┴────┐       │
+                       │         │          │       │
+                       │      后端        前端      │
+                       │         │          │       │
+                       │         │          ▼       │
+                       │         │   chrome-devtools│
+                       │         │      (91.25%)    │
+                       │         │          │       │
+                       └─────────┴──────────┴───────┘
+                                   │
+                                   ▼
+                            完成任务 ✓
 ```
 
 ---
 
 ## 🔗 相关文档
 
+### 测试验证报告
+- [工具评估索引](../TOOL-KNOWLEDGE/TOOLS-INDEX.md) - 完整测试结果
+- [工具对比总结](../TOOL-KNOWLEDGE/comparisons/tool-comparison-summary.md) - 详细对比
+- [评估报告目录](../TOOL-KNOWLEDGE/evaluations/README.md) - 各工具详细评估
+
+### 工作流程
 - [AGENTS.md](../AGENTS.md) - 完整工作流程
-- [TOOLS_GUIDE.md](TOOLS_GUIDE.md) - 工具使用指南
+- [CLAUDE.md](../CLAUDE.md) - 全局配置
 - [Superpowers README](../tools/superpowers/README.md)
-- [agent-skills README](../agent-skills/README.md)
 
 ---
 
 ## 💬 交互提示
 
 **对 AI 说**：
-- "帮我选择合适的工具"
-- "这个任务应该用什么流程？"
-- "切换到 [工具名称]"
-- "对比一下这些工具的区别"
+- "使用 code-review 审查这段代码"
+- "用 TDD 流程开发这个功能"
+- "用 brainstorming 分析这个问题"
+- "调用 chrome-devtools 测试这个组件"
+- "切换到 test-driven-development"
 
 ---
 
-> 💡 **提示**：AI 会根据你的任务自动推荐合适的工具，你也可以手动指定使用哪个工具！
+> 💡 **提示**：基于 TOOL-KNOWLEDGE 的实际测试验证，所有推荐工具都有详细的评估报告支持！
+
+---

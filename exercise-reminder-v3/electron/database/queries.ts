@@ -11,7 +11,16 @@ export class DatabaseQueries {
   // ===== 用户信息 =====
 
   getUserInfo(): UserInfo | null {
-    return this.db.prepare('SELECT * FROM user_info WHERE id = 1').get() as UserInfo | null;
+    return this.db.prepare(`
+      SELECT
+        id, height, weight, age, gender,
+        daily_target as dailyTarget,
+        initial_weight as initialWeight,
+        created_at as createdAt,
+        updated_at as updatedAt
+      FROM user_info
+      WHERE id = 1
+    `).get() as UserInfo | null;
   }
 
   saveUserInfo(info: Omit<UserInfo, 'id' | 'createdAt' | 'updatedAt'>) {
@@ -52,11 +61,27 @@ export class DatabaseQueries {
   // ===== 运动库 =====
 
   getAllExercises(): Exercise[] {
-    return this.db.prepare('SELECT * FROM exercises ORDER BY met_value DESC').all() as Exercise[];
+    return this.db.prepare(`
+      SELECT
+        id, name,
+        met_value as metValue,
+        intensity,
+        created_at as createdAt
+      FROM exercises
+      ORDER BY met_value DESC
+    `).all() as Exercise[];
   }
 
   getExerciseByName(name: string): Exercise | null {
-    return this.db.prepare('SELECT * FROM exercises WHERE name = ?').get(name) as Exercise | null;
+    return this.db.prepare(`
+      SELECT
+        id, name,
+        met_value as metValue,
+        intensity,
+        created_at as createdAt
+      FROM exercises
+      WHERE name = ?
+    `).get(name) as Exercise | null;
   }
 
   addExercise(name: string, metValue: number, intensity: string) {
@@ -73,7 +98,7 @@ export class DatabaseQueries {
   // ===== 活动记录 =====
 
   saveActivity(activity: Omit<Activity, 'id'>) {
-    return this.db.prepare(`
+    const result = this.db.prepare(`
       INSERT INTO activities (type, name, duration, calories, met_value, weight, timestamp, date, completed)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
@@ -87,11 +112,48 @@ export class DatabaseQueries {
       activity.date,
       activity.completed ? 1 : 0
     );
+
+    const statsRow = this.db.prepare(`
+      SELECT
+        SUM(CASE WHEN type = 'exercise' THEN calories ELSE 0 END) as total_calories,
+        COUNT(CASE WHEN type = 'exercise' THEN 1 END) as exercise_count,
+        COUNT(CASE WHEN type = 'gaze' THEN 1 END) as gaze_count,
+        COUNT(CASE WHEN type = 'stand' THEN 1 END) as stand_count
+      FROM activities
+      WHERE date = ?
+    `).get(activity.date) as { total_calories: number; exercise_count: number; gaze_count: number; stand_count: number };
+
+    const user = this.getUserInfo();
+    const targetCalories = user?.dailyTarget || 300;
+    const totalCalories = statsRow?.total_calories || 0;
+    const achieved = totalCalories >= targetCalories;
+
+    this.saveDailyStats({
+      id: 0,
+      date: activity.date,
+      totalCalories,
+      targetCalories,
+      achieved,
+      achievedToday: achieved,
+      exerciseCount: statsRow?.exercise_count || 0,
+      gazeCount: statsRow?.gaze_count || 0,
+      standCount: statsRow?.stand_count || 0,
+      weight: activity.weight || user?.weight,
+      streak: 0,
+    });
+
+    return result;
   }
 
   getActivitiesByDate(date: string): Activity[] {
     return this.db.prepare(`
-      SELECT * FROM activities
+      SELECT
+        id, type, name, duration, calories,
+        met_value as metValue,
+        weight,
+        timestamp, date,
+        completed
+      FROM activities
       WHERE date = ?
       ORDER BY timestamp DESC
     `).all(date) as Activity[];
@@ -99,7 +161,13 @@ export class DatabaseQueries {
 
   getRecentActivities(limit: number = 50): Activity[] {
     return this.db.prepare(`
-      SELECT * FROM activities
+      SELECT
+        id, type, name, duration, calories,
+        met_value as metValue,
+        weight,
+        timestamp, date,
+        completed
+      FROM activities
       ORDER BY timestamp DESC
       LIMIT ?
     `).all(limit) as Activity[];
@@ -229,11 +297,32 @@ export class DatabaseQueries {
   // ===== 提醒设置 =====
 
   getReminderSettings(): ReminderSettings[] {
-    return this.db.prepare('SELECT * FROM reminder_settings').all() as ReminderSettings[];
+    return this.db.prepare(`
+      SELECT
+        id,
+        type,
+        interval_min as intervalMin,
+        interval_max as intervalMax,
+        duration,
+        enabled,
+        updated_at as updatedAt
+      FROM reminder_settings
+    `).all() as ReminderSettings[];
   }
 
   getReminderSetting(type: 'exercise' | 'gaze' | 'stand'): ReminderSettings | null {
-    return this.db.prepare('SELECT * FROM reminder_settings WHERE type = ?').get(type) as ReminderSettings | null;
+    return this.db.prepare(`
+      SELECT
+        id,
+        type,
+        interval_min as intervalMin,
+        interval_max as intervalMax,
+        duration,
+        enabled,
+        updated_at as updatedAt
+      FROM reminder_settings
+      WHERE type = ?
+    `).get(type) as ReminderSettings | null;
   }
 
   updateReminderSettings(type: 'exercise' | 'gaze' | 'stand', settings: Omit<ReminderSettings, 'id' | 'updatedAt'>) {

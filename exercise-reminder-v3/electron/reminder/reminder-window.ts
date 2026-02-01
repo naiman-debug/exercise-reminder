@@ -13,43 +13,38 @@ export class ReminderWindowManager {
    * 显示提醒窗口
    */
   showReminder(eventData: TriggerEvent): void {
-    // 如果已有提醒窗口，先关闭
     if (this.reminderWindow && !this.reminderWindow.isDestroyed()) {
       this.reminderWindow.close();
     }
 
-    // 创建提醒窗口
     this.reminderWindow = this.createReminderWindow(eventData);
-
-    // 加载内容
     this.loadReminderContent(eventData);
   }
 
   /**
-   * 创建提醒窗口
+   * 创建提醒窗口（无边框）
    */
   private createReminderWindow(eventData: TriggerEvent): BrowserWindow {
-    const display = screen.getPrimaryDisplay();
-    const workArea = display.workAreaSize;
-
-    // 站立提醒使用小窗口（60% 大小）
     const isStandReminder = eventData.type === 'stand';
-    const windowWidth = isStandReminder ? Math.floor(workArea.width * 0.35) : Math.floor(workArea.width * 0.5);
-    const windowHeight = isStandReminder ? Math.floor(workArea.height * 0.4) : Math.floor(workArea.height * 0.6);
+    const windowWidth = isStandReminder ? 450 : 720;
+    const windowHeight = isStandReminder ? 360 : 480;
 
     const window = new BrowserWindow({
       width: windowWidth,
       height: windowHeight,
-      frame: true, // 显示窗口边框和标题栏
-      transparent: false,
+      useContentSize: true,
+      frame: false,
+      transparent: true,
+      backgroundColor: '#00000000',
       alwaysOnTop: true,
       skipTaskbar: false,
-      resizable: true,
+      resizable: false,
       movable: true,
       minimizable: true,
       maximizable: false,
       closable: true,
       title: this.getWindowTitle(eventData.type),
+      titleBarStyle: 'hidden',
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
@@ -57,10 +52,12 @@ export class ReminderWindowManager {
       },
     });
 
-    // 居中显示
-    window.center();
+    const display = screen.getPrimaryDisplay();
+    const workArea = display.workAreaSize;
+    const x = Math.floor((workArea.width - windowWidth) / 2);
+    const y = Math.floor((workArea.height - windowHeight) / 2);
+    window.setPosition(x, y);
 
-    // 窗口关闭时清理引用
     window.on('closed', () => {
       this.reminderWindow = null;
     });
@@ -74,11 +71,11 @@ export class ReminderWindowManager {
   private getWindowTitle(type: string): string {
     switch (type) {
       case 'exercise':
-        return '🏃 微运动时间';
+        return '微运动时间';
       case 'gaze':
-        return '👀 远眺放松';
+        return '远眺放松';
       case 'stand':
-        return '🧍 站立提醒';
+        return '站立提醒';
       default:
         return '健康提醒';
     }
@@ -99,8 +96,6 @@ export class ReminderWindowManager {
 
     if (process.env.NODE_ENV === 'development') {
       this.reminderWindow.loadURL(`http://localhost:5173/#/reminder?${params.toString()}`);
-      // 开发模式打开 DevTools
-      // this.reminderWindow.webContents.openDevTools();
     } else {
       this.reminderWindow.loadURL(`file://${path.join(__dirname, '../dist-renderer/index.html')}#/reminder?${params.toString()}`);
     }

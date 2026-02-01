@@ -36,6 +36,10 @@ interface ElectronAPI {
   // 系统功能
   getSystemSetting: (key: string) => Promise<string | null>;
   setSystemSetting: (key: string, value: string) => Promise<any>;
+  getAutoStart: () => Promise<boolean>;
+  setAutoStart: (enabled: boolean) => Promise<boolean>;
+  getGlobalMinInterval: () => Promise<number>;
+  setGlobalMinInterval: (seconds: number) => Promise<number>;
 
   // 窗口控制
   showMainWindow: () => Promise<{ success: boolean }>;
@@ -49,7 +53,13 @@ interface ElectronAPI {
 }
 
 declare global {
+  var electronAPI: ElectronAPI;
+
   interface Window {
+    electronAPI: ElectronAPI;
+  }
+
+  interface GlobalThis {
     electronAPI: ElectronAPI;
   }
 }
