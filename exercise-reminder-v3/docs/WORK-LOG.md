@@ -1987,3 +1987,26 @@ M	exercise-reminder-v3/.husky/pre-commit
 ---
 
 
+## 📝 Git Commit 记录
+
+**时间**：2026-02-01 23:54
+**提交者**：Naiman.zc
+**Commit**：`2ca16b74c7d9f78f5e8cf6d880b3ce474dfac986`
+
+### 提交信息
+> docs: 更新约束文档到 v2.0
+
+
+
+### 变更文件
+```
+M	exercise-reminder-v3/CURRENT_TASK.md
+M	exercise-reminder-v3/constraints/README.md
+M	exercise-reminder-v3/docs/TASKS.md
+```
+
+**自动记录于**：2026-02-01 23:55:06
+
+---
+
+
