@@ -2,28 +2,123 @@
 cd "$(dirname "$0")/.." || exit 1
 
 echo "=== Pre-commit Hook 检查 ==="
+echo ""
 
-# 1. 类型检查
-echo "1/2 类型检查..."
-npm run typecheck
+# 获取暂存的文件
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
+
+# 检查是否有约束文件被修改
+CONSTRAINT_FILES_CHANGED=$(echo "$STAGED_FILES" | grep -E "(constraints/.*\.md|CLAUDE\.md|CURRENT_TASK\.md|docs/TASKS\.md)" || true)
+
+# ============================================
+# 检查 1: 关键文档同步检查
+# ============================================
+if [ -n "$CONSTRAINT_FILES_CHANGED" ]; then
+  echo "📋 检查 1/4: 关键文档同步"
+
+  # 如果修改了约束文件，检查是否同时修改了 TASKS.md 和 CURRENT_TASK.md
+  CONSTRAINT_MODIFIED=$(echo "$CONSTRAINT_FILES_CHANGED" | grep -E "(constraints/.*\.md|CLAUDE\.md)" || true)
+  TASKS_MODIFIED=$(echo "$CONSTRAINT_FILES_CHANGED" | grep "docs/TASKS.md" || true)
+  CURRENT_TASK_MODIFIED=$(echo "$CONSTRAINT_FILES_CHANGED" | grep "CURRENT_TASK.md" || true)
+
+  if [ -n "$CONSTRAINT_MODIFIED" ]; then
+    if [ -z "$TASKS_MODIFIED" ] || [ -z "$CURRENT_TASK_MODIFIED" ]; then
+      echo ""
+      echo "⚠️  约束文件已修改，但关键文档未同步更新！"
+      echo ""
+      echo "修改的约束文件："
+      echo "$CONSTRAINT_MODIFIED"
+      echo ""
+      echo "请同时更新以下文档："
+      if [ -z "$TASKS_MODIFIED" ]; then
+        echo "  ✗ docs/TASKS.md - 任务看板"
+      else
+        echo "  ✓ docs/TASKS.md - 任务看板"
+      fi
+      if [ -z "$CURRENT_TASK_MODIFIED" ]; then
+        echo "  ✗ CURRENT_TASK.md - 当前任务"
+      else
+        echo "  ✓ CURRENT_TASK.md - 当前任务"
+      fi
+      echo ""
+      echo "运行以下命令添加文档："
+      echo "  git add docs/TASKS.md CURRENT_TASK.md"
+      echo ""
+      read -p "是否继续提交（不推荐）？(yes/no): " confirm
+      if [ "$confirm" != "yes" ] && [ "$confirm" != "y" ]; then
+        echo "提交已取消"
+        exit 1
+      fi
+    else
+      echo "  ✓ 关键文档已同步更新"
+    fi
+  fi
+  echo ""
+else
+  echo "📋 检查 1/4: 关键文档同步 ✓ (无约束文件变更)"
+  echo ""
+fi
+
+# ============================================
+# 检查 2: 代码审查提醒
+# ============================================
+echo "📋 检查 2/4: 代码审查提醒"
+
+CODE_FILES_CHANGED=$(echo "$STAGED_FILES" | grep -E "\.(ts|tsx|js|jsx)$" || true)
+
+if [ -n "$CODE_FILES_CHANGED" ]; then
+  echo ""
+  echo "检测到代码文件变更，建议先进行代码审查："
+  echo "  使用 Skill: /skill requesting-code-review"
+  echo ""
+  read -p "是否已完成代码审查？(yes/no): " review_confirm
+  if [ "$review_confirm" != "yes" ] && [ "$review_confirm" != "y" ]; then
+    echo "请先完成代码审查后再提交"
+    echo "提示：运行 /skill requesting-code-review 进行审查"
+    exit 1
+  fi
+  echo "  ✓ 代码审查已完成"
+else
+  echo "  ✓ 无代码文件变更"
+fi
+echo ""
+
+# ============================================
+# 检查 3: 类型检查
+# ============================================
+echo "📋 检查 3/4: TypeScript 类型检查"
+npm run typecheck --silent
 TYPECHECK_EXIT=$?
 
 if [ $TYPECHECK_EXIT -ne 0 ]; then
   echo ""
-  echo "类型检查失败！请修复 TypeScript 错误后再提交。"
+  echo "✗ 类型检查失败！"
+  echo "请修复 TypeScript 错误后再提交。"
+  echo "运行: npm run typecheck"
   exit 1
 fi
+echo "  ✓ 类型检查通过"
+echo ""
 
-# 2. 单元测试
-echo "2/2 单元测试..."
-npm run test
+# ============================================
+# 检查 4: 单元测试
+# ============================================
+echo "📋 检查 4/4: 单元测试"
+npm run test --silent
 TEST_EXIT=$?
 
 if [ $TEST_EXIT -ne 0 ]; then
   echo ""
-  echo "测试失败！请确保所有测试通过后再提交。"
+  echo "✗ 测试失败！"
+  echo "请确保所有测试通过后再提交。"
+  echo "运行: npm test"
   exit 1
 fi
-
+echo "  ✓ 单元测试通过"
 echo ""
-echo "=== 所有检查通过 ==="
+
+# ============================================
+# 总结
+# ============================================
+echo "=== ✓ 所有检查通过 ==="
+echo ""
