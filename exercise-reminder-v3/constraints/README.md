@@ -137,7 +137,26 @@
 
 ---
 
-#### 5. Hookify 自动提醒 ⭐ **新增**
+#### 5. Git 自动提交推送规则 ⭐ **新增**
+
+**文档**：[GIT-AUTO-COMMIT.md](./GIT-AUTO-COMMIT.md)
+
+**作用**：
+- 确保代码及时备份到 GitHub，防止丢失
+- 自动化提交流程
+
+**强制规则**：
+- ✅ 完成任何代码后必须执行 git add + git commit + git push
+- ✅ 会话结束前检查并推送未提交的修改
+- ✅ 意外关闭后新会话检查未提交修改
+
+**提交信息规范**：`<type>: <描述>`
+
+允许的 type：`feat`, `fix`, `docs`, `style`, `test`, `chore`, `perf`, `ci`
+
+---
+
+#### 6. Hookify 自动提醒 ⭐ **新增**
 
 **文档**：`.claude/hookify.*.local.md`
 
@@ -191,6 +210,11 @@
 ---
 
 ## 📝 约束文档版本
+
+- **v1.5** (2026-02-01) - 添加 Git 自动提交推送规则 🆕
+  - 新增 `constraints/GIT-AUTO-COMMIT.md` 文档
+  - 新增 Hookify 规则 `hookify.git-auto-push.local.md`
+  - 定义自动提交流程和错误处理方案
 
 - **v1.4** (2026-02-01) - 添加 Git Hooks 规则 🆕
   - 新增 `docs/GIT-HOOKS.md` 文档
