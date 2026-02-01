@@ -11,6 +11,44 @@
 
 所有 AI Agent 在开发此项目时，必须遵守以下约束文档：
 
+#### 0. 关键文档自动更新约束 ⭐⭐⭐ **最高优先级** 🆕
+
+**文档**：[critical-docs-auto-update.md](./critical-docs-auto-update.md)
+
+**作用**：
+- 确保项目关键文档始终保持最新状态
+- 保证文档之间的一致性和同步
+- 防止文档过时导致的信息不对称
+
+**关键文档**：
+- **README.md** - 项目门面
+- **CLAUDE.md** - AI 辅助配置
+- **CURRENT_TASK.md** - 当前任务快照
+- **docs/TASKS.md** - 详细任务管理
+
+**强制规则**：
+- ✅ **完成任务后**：必须同步更新 docs/TASKS.md + CURRENT_TASK.md
+- ✅ **开始任务时**：必须同步更新 docs/TASKS.md + CURRENT_TASK.md
+- ✅ **重大变更后**：必须关联更新所有受影响文档（README + CLAUDE.md）
+- ✅ **会话结束时**：必须检查文档一致性
+- ✅ **Git 提交前**：必须验证文档状态
+
+**Hook 规则**：
+- `hookify.task-sync-on-complete.local.md` - 任务完成自动同步
+- `hookify.tech-stack-sync.local.md` - 技术栈变更自动关联
+- `hookify.doc-consistency-check.local.md` - 会话结束前一致性检查
+
+**关联更新矩阵**：
+| 变更类型 | README.md | CLAUDE.md | CURRENT_TASK.md | docs/TASKS.md |
+|----------|-----------|-----------|-----------------|--------------|
+| 完成任务 | - | - | ✅ 必须更新 | ✅ 必须更新 |
+| 开始任务 | - | - | ✅ 必须更新 | ✅ 必须更新 |
+| 技术栈变更 | ✅ 必须更新 | ✅ 必须更新 | - | - |
+| 架构变更 | ✅ 必须更新 | ✅ 必须更新 | - | - |
+| 里程碑完成 | ✅ 更新路线图 | - | ✅ 更新进度 | ✅ 更新进度 |
+
+---
+
 #### 1. 工作流恢复约束 ⭐ **最重要**
 
 **文档**：[workflow-recovery.md](./workflow-recovery.md)
@@ -210,6 +248,16 @@
 ---
 
 ## 📝 约束文档版本
+
+- **v1.6** (2026-02-01) - 添加关键文档自动更新约束 ⭐🆕
+  - 新增 `constraints/critical-docs-auto-update.md` 文档
+  - 定义 4 个关键文档（README.md、CLAUDE.md、CURRENT_TASK.md、docs/TASKS.md）
+  - 创建关联更新矩阵（变更类型 → 受影响文档）
+  - 新增 3 个 Hookify 规则：
+    - `hookify.task-sync-on-complete.local.md` - 任务完成自动同步
+    - `hookify.tech-stack-sync.local.md` - 技术栈变更自动关联
+    - `hookify.doc-consistency-check.local.md` - 会话结束前一致性检查
+  - 建立文档一致性验证机制
 
 - **v1.5** (2026-02-01) - 添加 Git 自动提交推送规则 🆕
   - 新增 `constraints/GIT-AUTO-COMMIT.md` 文档

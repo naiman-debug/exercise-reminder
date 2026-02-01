@@ -1712,3 +1712,91 @@ A	exercise-reminder-v3/test-file5.txt
 ---
 
 
+## 📝 Git Commit 记录
+
+**时间**：2026-02-01 21:41
+**提交者**：Naiman.zc
+**Commit**：`776d7517edf2e796cb27d4aa520db4a7ecacd468`
+
+### 提交信息
+> chore: 完善 Git hooks 规则配置
+
+- 修复 worktree 环境下的 hooks 执行问题
+- 更新 pre-commit/post-commit/pre-push 添加项目根目录切换
+- 配置绝对路径 hooksPath
+- 更新 docs/GIT-HOOKS.md 文档
+- 更新 constraints/README.md 添加 hooks 规则说明
+- 约束文档版本升级到 v1.4
+
+### 变更文件
+```
+M	AGENTS.md
+M	INFRA.md
+M	docs/GAME_DEV_GUIDE.md
+M	docs/README.md
+M	docs/TOOLS_GUIDE.md
+M	docs/TOOL_SELECTION_GUIDE.md
+M	docs/plugin/PLUGIN使用指南.md
+M	exercise-reminder-v3/.husky/post-commit
+M	exercise-reminder-v3/.husky/pre-commit
+M	exercise-reminder-v3/.husky/pre-push
+M	exercise-reminder-v3/constraints/workflow-recovery.md
+M	exercise-reminder-v3/docs/WORK-LOG.md
+M	exercise-reminder-v3/electron/database/queries.ts
+M	exercise-reminder-v3/electron/ipc/channels.ts
+M	exercise-reminder-v3/electron/ipc/handlers.ts
+M	exercise-reminder-v3/electron/main.ts
+M	exercise-reminder-v3/electron/preload.ts
+M	exercise-reminder-v3/electron/reminder/reminder-window.ts
+M	exercise-reminder-v3/electron/reminder/scheduler.ts
+M	exercise-reminder-v3/electron/tray/index.ts
+M	exercise-reminder-v3/index.html
+M	exercise-reminder-v3/package.json
+D	exercise-reminder-v3/postcss.config.js
+M	exercise-reminder-v3/src/App.tsx
+M	exercise-reminder-v3/src/global.d.ts
+M	exercise-reminder-v3/src/pages/Home.tsx
+M	exercise-reminder-v3/src/pages/ReminderModal.tsx
+M	exercise-reminder-v3/src/pages/Settings.tsx
+M	exercise-reminder-v3/src/store/useSettingsStore.ts
+D	exercise-reminder-v3/tailwind.config.js
+D	exercise-reminder-v3/test-file.txt
+D	exercise-reminder-v3/test-file2.txt
+D	exercise-reminder-v3/test-file3.txt
+D	exercise-reminder-v3/test-file4.txt
+D	exercise-reminder-v3/test-file5.txt
+D	exercise-reminder-v3/test-hooks.txt
+M	exercise-reminder-v3/tsconfig.electron.json
+M	exercise-reminder-v3/tsconfig.json
+```
+
+**自动记录于**：2026-02-01 21:41:59
+
+---
+
+
+## 📝 Git Commit 记录
+
+**时间**：2026-02-01 21:54
+**提交者**：Naiman.zc
+**Commit**：`6c31d8d7b3bf513398e02a8d06c7d8a6cf51698a`
+
+### 提交信息
+> docs: 添加 Git 自动提交推送规则
+
+- 新增 constraints/GIT-AUTO-COMMIT.md（强制版 v2.0）
+- 完整提交流程：代码审查 → 测试 → 提交 → 推送
+- 集成 Skills: requesting-code-review, backend-patterns, security-review
+- 添加会话结束检查和意外关闭恢复机制
+
+### 变更文件
+```
+A	exercise-reminder-v3/constraints/GIT-AUTO-COMMIT.md
+M	exercise-reminder-v3/constraints/README.md
+```
+
+**自动记录于**：2026-02-01 21:54:39
+
+---
+
+
