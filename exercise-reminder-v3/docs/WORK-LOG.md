@@ -1823,3 +1823,62 @@ M	exercise-reminder-v3/docs/WORK-LOG.md
 ---
 
 
+## 📝 Git Commit 记录
+
+**时间**：2026-02-01 22:07
+**提交者**：Naiman.zc
+**Commit**：`df0039ad2c826a75148d17a384d6c9728017137c`
+
+### 提交信息
+> feat: 添加 MCP 配置、测试文件和项目文档
+
+
+
+### 变更文件
+```
+A	exercise-reminder-v3/.mcp.json
+A	exercise-reminder-v3/CLAUDE.md
+A	exercise-reminder-v3/CURRENT_TASK.md
+A	exercise-reminder-v3/constraints/critical-docs-auto-update.md
+A	exercise-reminder-v3/constraints/knowledge-update-triggers.md
+A	exercise-reminder-v3/constraints/testing-rules.md
+A	exercise-reminder-v3/docs/AUTOMATION-RECOMMENDATIONS.md
+A	exercise-reminder-v3/docs/BUG-QUESTION-LOG.md
+A	exercise-reminder-v3/docs/KNOWLEDGE-BASE.md
+A	exercise-reminder-v3/docs/SKILLS-MCP-GUIDE.md
+A	exercise-reminder-v3/docs/TASKS.md
+A	exercise-reminder-v3/docs/WORK-LOG-REDESIGN.md
+M	exercise-reminder-v3/docs/WORK-LOG.md
+A	exercise-reminder-v3/docs/WORKFLOW-EVOLUTION.md
+A	exercise-reminder-v3/docs/plans/2026-01-30-settings-autostart-reminder-design.md
+A	exercise-reminder-v3/docs/plans/2026-01-30-settings-autostart-reminder.md
+A	exercise-reminder-v3/electron/__tests__/autostart-ipc.test.ts
+A	exercise-reminder-v3/jest.config.cjs
+A	exercise-reminder-v3/jest.config.js
+A	exercise-reminder-v3/jest.setup.js
+A	exercise-reminder-v3/openspec/proposals/2026-01-30-settings-autostart-reminder.md
+A	exercise-reminder-v3/postcss.config.cjs
+A	exercise-reminder-v3/src/__tests__/Home.test.tsx
+A	exercise-reminder-v3/src/__tests__/ReminderModal.test.tsx
+A	exercise-reminder-v3/src/__tests__/Settings.test.tsx
+A	exercise-reminder-v3/src/__tests__/hash.test.ts
+A	exercise-reminder-v3/src/__tests__/useExerciseStore.test.ts
+A	exercise-reminder-v3/src/__tests__/useSettingsStore.test.ts
+A	exercise-reminder-v3/src/assets/fonts/JetBrainsMono-400.ttf
+A	exercise-reminder-v3/src/assets/fonts/JetBrainsMono-600.ttf
+A	exercise-reminder-v3/src/assets/fonts/JetBrainsMono-700.ttf
+A	exercise-reminder-v3/src/assets/fonts/Outfit-400.ttf
+A	exercise-reminder-v3/src/assets/fonts/Outfit-600.ttf
+A	exercise-reminder-v3/src/assets/fonts/Outfit-700.ttf
+A	exercise-reminder-v3/src/assets/fonts/fonts.css
+A	exercise-reminder-v3/src/styles/reminder-modal.css
+A	exercise-reminder-v3/src/utils/hash.ts
+A	exercise-reminder-v3/src/validation/schemas.ts
+A	exercise-reminder-v3/tailwind.config.cjs
+```
+
+**自动记录于**：2026-02-01 22:07:56
+
+---
+
+
