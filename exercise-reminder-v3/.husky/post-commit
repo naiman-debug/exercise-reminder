@@ -10,6 +10,27 @@ commit_subject=$(git log -1 --format='%s')
 commit_body=$(git log -1 --format='%b')
 changed_files=$(git diff-tree --no-commit-id --name-status -r HEAD)
 
+# === 约束文件变更检查 ===
+constraint_files_changed=$(echo "$changed_files" | grep -E "(constraints/.*\.md|CLAUDE\.md|\.claude/hookify.*\.md)" || true)
+
+if [ -n "$constraint_files_changed" ]; then
+  echo ""
+  echo "=== ⚠️ 约束体系已变更 ==="
+  echo ""
+  echo "检测到以下约束文件已修改："
+  echo "$constraint_files_changed"
+  echo ""
+  echo "请检查是否需要更新以下文档："
+  echo "  [ ] CONSTRAINTS-SYSTEM.md - 约束体系总览"
+  echo "  [ ] constraints/README.md - 版本号更新"
+  echo "  [ ] CURRENT_TASK.md - 任务状态同步"
+  echo "  [ ] docs/TASKS.md - 任务看板更新"
+  echo ""
+  echo "提示：说 \"/检查约束\" 自动扫描约束体系状态"
+  echo "============================="
+  echo ""
+fi
+
 # 生成日志条目
 log_entry="## 📝 Git Commit 记录
 
