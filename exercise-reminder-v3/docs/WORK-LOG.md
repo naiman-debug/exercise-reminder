@@ -1800,3 +1800,26 @@ M	exercise-reminder-v3/constraints/README.md
 ---
 
 
+## 📝 Git Commit 记录
+
+**时间**：2026-02-01 22:07
+**提交者**：Naiman.zc
+**Commit**：`ef2ab06df498041ceef0a67eab274b4fe53cd66b`
+
+### 提交信息
+> docs: 更新项目文档和约束规则
+
+
+
+### 变更文件
+```
+M	exercise-reminder-v3/README.md
+M	exercise-reminder-v3/constraints/README.md
+M	exercise-reminder-v3/docs/WORK-LOG.md
+```
+
+**自动记录于**：2026-02-01 22:07:14
+
+---
+
+
